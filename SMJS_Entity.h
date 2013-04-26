@@ -26,11 +26,7 @@ public:
 
 	void SetEntity(CBaseEntity *ent);
 
-	virtual void Destroy(){
-		valid = false;
-
-		SMJS_BaseWrapped::Destroy();
-	}
+	virtual void Destroy();
 
 	FUNCTION_DECL(isValid);
 	FUNCTION_DECL(getClassname);

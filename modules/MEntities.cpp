@@ -42,11 +42,17 @@ SMJS_Entity* GetEntityWrapper(CBaseEntity *pEntity){
 
 void SetEntityWrapper(CBaseEntity *pEntity, SMJS_Entity *wrapper){
 	auto ref = gamehelpers->EntityToReference(pEntity);
-	refs.insert(std::make_pair(ref, wrapper));
+	if(wrapper == NULL){
+
+	}else{
+		refs.insert(std::make_pair(ref, wrapper));
+	}
 }
 
 void ClearEntityWrappers(){
 	for(auto it = refs.begin(); it != refs.end(); ++it){
+		// Mark it as not valid so it doesn't call SetEntityWrapper
+		it->second->valid = false;
 		it->second->Destroy();
 	}
 	refs.clear();

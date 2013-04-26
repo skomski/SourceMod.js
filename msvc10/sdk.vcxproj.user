@@ -12,4 +12,9 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommand>C:\Users\Administrador\Desktop\dota 2 beta\srcds.exe</LocalDebuggerCommand>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with Symbols|Win32'">
+    <LocalDebuggerCommandArguments>-game dota +map dota +developer 1 +maxplayers 10 -console +exec autoexec.cfg</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommand>C:\Users\Administrador\Desktop\dota 2 beta\srcds.exe</LocalDebuggerCommand>
+  </PropertyGroup>
 </Project>

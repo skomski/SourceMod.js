@@ -32,7 +32,7 @@ struct AbilityData {
 
 	struct {
 		union {
-			int32 asInt;
+			int32_t asInt;
 			float asFloat;
 		} value;
 		uint32_t flags1; // EE FF EE FF (LE)
@@ -113,6 +113,8 @@ void CallGetAbilityValueHook(CBaseEntity *ability, AbilityData *data){
 		return;
 	}*/
 
+	auto entWrapper = GetEntityWrapper((CBaseEntity*) ability);
+
 	
 	int len = GetNumPlugins();
 	for(int i = 0; i < len; ++i){
@@ -126,9 +128,10 @@ void CallGetAbilityValueHook(CBaseEntity *ability, AbilityData *data){
 
 		if(hooks->size() == 0) continue;
 
-		v8::Handle<v8::Value> args[3];
-		args[0] = v8::String::New(clsname);
-		args[1] = v8::String::New(data->field);
+		v8::Handle<v8::Value> args[4];
+		args[0] = entWrapper->GetWrapper(pl);
+		args[1] = v8::String::New(clsname);
+		args[2] = v8::String::New(data->field);
 
 		auto arr = v8::Array::New();
 		int len = -1;
@@ -147,11 +150,11 @@ void CallGetAbilityValueHook(CBaseEntity *ability, AbilityData *data){
 		}
 		
 
-		args[2] = arr;
+		args[3] = arr;
 
 		for(auto it = hooks->begin(); it != hooks->end(); ++it){
 			auto func = *it;
-			auto ret = func->Call(pl->GetContext()->Global(), 3, args);
+			auto ret = func->Call(pl->GetContext()->Global(), 4, args);
 			if(!ret.IsEmpty()){
 				if(!ret->IsArray()) continue;
 				auto obj = ret->ToObject();

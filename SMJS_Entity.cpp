@@ -1,5 +1,6 @@
 #include "SMJS_Entity.h"
 #include "SMJS_Plugin.h"
+#include "modules/MEntities.h"
 #include "datamap.h"
 
 #define SIZEOF_VARIANT_T		20
@@ -27,6 +28,16 @@ SMJS_Entity::SMJS_Entity(CBaseEntity *ent){
 	SetEntity(ent);
 
 	keyvalues.entWrapper = this;
+}
+
+void SMJS_Entity::Destroy(){
+	if(valid){
+		SetEntityWrapper(this->ent, NULL);
+	}
+
+	valid = false;
+
+	SMJS_BaseWrapped::Destroy();
 }
 
 void SMJS_Entity::SetEntity(CBaseEntity *ent){
