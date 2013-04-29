@@ -230,6 +230,7 @@ DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
 	CBaseEntity *client;
 	const char *newHero;
 	bool block;
+	CCommand *tmp;
 
 	__asm {
 		push	ebp
@@ -253,7 +254,9 @@ DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
 				call	ClientPickHero_Actual
 			}
 		}else{
-			CCommand *tmp = new CCommand(*cmd);
+			// It has to be a pointer because I'm too lazy to calculate how much space
+			// CCommand would use in the stack
+			tmp = new CCommand(*cmd);
 
 			tmp->ArgV()[1] = newHero;
 
@@ -264,6 +267,7 @@ DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
 			}
 
 			delete newHero;
+			delete tmp;
 		}
 	}
 

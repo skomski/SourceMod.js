@@ -54,8 +54,8 @@
 		"Offsets"
 		{
 			/*
-				void __thiscall LevelUpUnit(void *unit, bool playEffects)
-				Found close to the string dota_hero_level
+				void CDOTA_BaseNPC_Hero::LevelUp(bool playEffects);
+				Found close to the string dota_hero_level in the main dispatch function for client commands
 			*/
 			"HeroLevelUp"
 			{
