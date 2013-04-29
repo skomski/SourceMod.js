@@ -143,11 +143,18 @@ public:
 		proto->Set(v8::String::New("TEAM_RADI"), v8::Int32::New(2), v8::ReadOnly);
 		proto->Set(v8::String::New("TEAM_DIRE"), v8::Int32::New(3), v8::ReadOnly);
 		proto->Set(v8::String::New("TEAM_NEUTRAL"), v8::Int32::New(4), v8::ReadOnly);
-
 		proto->Set(v8::String::New("TEAM_RADIANT"), v8::Int32::New(2), v8::ReadOnly);
 
-#define HERO_ID_CONST(name, value) proto->Set(v8::String::New("HERO_" #name), v8::Int32::New(Hero_##value), v8::ReadOnly);
+		proto->Set(v8::String::New("DAMAGE_TYPE_PHYSICAL"), v8::Int32::New(1), v8::ReadOnly);
+		proto->Set(v8::String::New("DAMAGE_TYPE_MAGICAL"), v8::Int32::New(2), v8::ReadOnly);
+		proto->Set(v8::String::New("DAMAGE_TYPE_COMPOSITE"), v8::Int32::New(4), v8::ReadOnly);
+		proto->Set(v8::String::New("DAMAGE_TYPE_PURE"), v8::Int32::New(8), v8::ReadOnly);
+		proto->Set(v8::String::New("DAMAGE_TYPE_HP_REMOVAL"), v8::Int32::New(16), v8::ReadOnly);
 
+
+
+#define HERO_ID_CONST(name, value) proto->Set(v8::String::New("HERO_" #name), v8::Int32::New(Hero_##value), v8::ReadOnly);
+		
 		HERO_ID_CONST(INVALID, Invalid);
 
 		//Radiant Strength

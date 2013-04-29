@@ -16,20 +16,6 @@
 				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x0C\x83******\x53\x56\x57\x89\x4C\x24\x14\x74*\x8B\xB1\x08\x02\x00\x00\x8B\xC6\x85\xF6\x75"
 			}
 			
-			/*
-				void *__thiscall PlayerPickHero(void *this, int a2, const char *a3)
-				
-				Function uses only the string "HeroID"
-				It's called in the function that uses the strings "%s connected" and "%s reconnected"
-				Like this: PlayerPickHero(0, v25, "random");
-				
-			*/
-			"PlayerPickHero"
-			{
-				"library"	"server"
-				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B*****\x57\x89\x75\xFC\x85\xC9\x74*\x8B\x01\x8B\x50\x08\xFF\xD2\x8B\x18\xEB*\x83\xCB\xFF"
-			}
-			
 			
 			/*
 				CBaseEntity* __usercall CreateUnit<eax>(const char *clsname<eax>, int player, signed int team, char bNoMouse, signed int alwaysZero)
@@ -51,6 +37,29 @@
 			{
 				"library"	"server"
 				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x51\x53\x56\x8B\xF0\x83\xBE\x08\x04\x00\x00\x00"
+			}
+			
+			/*
+				void __userpurge ClientPickHero(void *client<esi>, CCommand *a2)
+				
+				Called in the main dispatch function for client commands, in the "dota_select_hero" section
+			*/
+			"ClientPickHero"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x51\x53\x8B\x5D\x08\x83\x3B\x02\x57\x0F*****\x8B\x06\x8B*****\x8B\xCE\xFF\xD2\x83\xCF\xFF"
+			}
+		}
+		
+		"Offsets"
+		{
+			/*
+				void __thiscall LevelUpUnit(void *unit, bool playEffects)
+				Found close to the string dota_hero_level
+			*/
+			"HeroLevelUp"
+			{
+				"windows"	"423"
 			}
 		}
 	}

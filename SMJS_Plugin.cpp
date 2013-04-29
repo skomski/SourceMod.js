@@ -32,7 +32,7 @@ SMJS_Plugin* SMJS_Plugin::GetPluginByDir(const char *dir){
 	return NULL;
 }
 
-SMJS_Plugin::SMJS_Plugin(const char *name){
+SMJS_Plugin::SMJS_Plugin(){
 	apiVersion = SMJS_API_VERSION;
 	isSandboxed = true;
 	id = numPlugins++;
@@ -58,12 +58,18 @@ void SMJS_Plugin::LoadModules(){
 	for(auto it = modules.begin(); it != modules.end(); ++it) {
 		SMJS_Module *module = (*it);
 		if(!module->sandboxed && isSandboxed) continue;
+
+		loadedModules.push_back(module);
 		context->Global()->Set(v8::String::New(module->identifier.c_str()), module->GetWrapper(this), ReadOnly);
 	}
 	
 }
 
 SMJS_Plugin::~SMJS_Plugin(){
+	for(auto it = loadedModules.begin(); it != loadedModules.end(); ++it){
+		(*it)->OnPluginDestroyed(this);
+	}
+
 	for(auto it = destroyCallbackFuncs.begin(); it != destroyCallbackFuncs.end(); ++it){
 		(*it)(this);
 	}

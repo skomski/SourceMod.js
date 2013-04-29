@@ -13,10 +13,12 @@ public:
 		
 	}
 
+
 	WRAPPED_CLS(SMJS_GameRules, SMJS_BaseWrapped){
 		proto->Set("props", v8::Null());
-	}
 
+	}
+	
 	void OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
 		auto obj = wrapper->ToObject();
 

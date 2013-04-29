@@ -45,13 +45,14 @@ protected: // Protected variables
 
 	std::vector<DestroyCallback> destroyCallbackFuncs;
 	std::vector<IPluginDestroyedHandler*> destroyCallbackHandlers;
+	std::vector<SMJS_Module*> loadedModules;
 
 	std::map<std::string, std::vector<v8::Persistent<v8::Function>>> hooks;
 	std::map<std::string, std::vector<v8::Persistent<v8::Function>>> eventHooks;
 	std::map<std::string, std::vector<v8::Persistent<v8::Function>>> eventPostHooks;
 
 public: // Public functions
-	SMJS_Plugin(const char *name);
+	SMJS_Plugin();
 	~SMJS_Plugin();
 	// Virtuals for the public interface, do NOT change the order
 	virtual PLUGIN_ID GetId(){return id;}
@@ -70,6 +71,10 @@ public: // Public functions
 	void LoadModules();
 
 	void CheckApi();
+
+	inline int GetApiVersion(){
+		return apiVersion;
+	}
 
 	void SetDir(const char* newDir){
 		dir.assign(newDir);
@@ -90,7 +95,6 @@ public: // Public functions
 	static SMJS_Plugin *GetPluginByDir(const char *dir);
 
 private: // Private functions
-	SMJS_Plugin();
 	void ReportException(v8::TryCatch* try_catch);
 
 

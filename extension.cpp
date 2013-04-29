@@ -192,7 +192,7 @@ SMJS_Plugin *LoadPlugin(const char *dir){
 	auto plugin = SMJS_Plugin::GetPluginByDir(dir);
 	if(plugin != NULL) return plugin;
 
-	plugin = new SMJS_Plugin(dir);
+	plugin = new SMJS_Plugin();
 
 	char path[512];
 	smutils->BuildPath(Path_SM, path, sizeof(path), "plugins.js/%s", dir);

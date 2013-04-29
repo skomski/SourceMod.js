@@ -24,6 +24,7 @@ public:
 	}
 
 	void OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){};
+	void OnPluginDestroyed(SMJS_Plugin *plugin){};
 
 	WRAPPED_CLS(SMJS_Module, SMJS_BaseWrapped) {
 		temp->SetClassName(v8::String::New("Module"));

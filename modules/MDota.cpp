@@ -12,10 +12,14 @@ IGameConfig *dotaConf = NULL;
 void *LoadParticleFile;
 void *CreateUnit;
 
+
+CDetour *parseUnitDetour;
+CDetour *getAbilityValueDetour;
+CDetour *clientPickHeroDetour;
+
 enum FieldType {
 	FT_Void = 0,
 	FT_Float = 1,
-	FT_Array = 4,
 	FT_Int = 5
 };
 
@@ -26,7 +30,7 @@ struct AbilityData {
 
 	struct {
 		int32_t		something;
-		FieldType	type; // FT_Array
+		FieldType	type;
 		uint32_t	flags;
 	} root;
 
@@ -41,11 +45,6 @@ struct AbilityData {
 		uint32_t flags2; // EE FF EE FF (LE)
 	} values[12];
 };
-
-
-CDetour *parseUnitDetour;
-CDetour *playerPickHeroDetour;
-CDetour *getAbilityValueDetour;
 
 DETOUR_DECL_MEMBER3(ParseUnit, void*, void*, a2, void*, a3, void*, a4){
 	void *ret = DETOUR_MEMBER_CALL(ParseUnit)(a2, a3, a4);
@@ -72,47 +71,9 @@ DETOUR_DECL_MEMBER3(ParseUnit, void*, void*, a2, void*, a3, void*, a4){
 	return ret;
 }
 
-DETOUR_DECL_MEMBER2(PlayerPickHero, int, int, a1, char*, hero){
-
-	// Repick
-	if(hero == NULL){
-		return DETOUR_MEMBER_CALL(PlayerPickHero)(a1, hero);
-	}
-
-	int len = GetNumPlugins();
-	for(int i = 0; i < len; ++i){
-		SMJS_Plugin *pl = GetPlugin(i);
-		if(pl == NULL) continue;
-		
-		HandleScope handle_scope(pl->GetIsolate());
-		Context::Scope context_scope(pl->GetContext());
-
-		auto hooks = pl->GetHooks("Dota_OnHeroPicked");
-
-		if(hooks->size() == 0) continue;
-
-		v8::Handle<v8::Value> args = v8::String::New(hero);
-
-		for(auto it = hooks->begin(); it != hooks->end(); ++it){
-			auto func = *it;
-			auto ret = func->Call(pl->GetContext()->Global(), 1, &args);
-			if(!ret.IsEmpty() && ret->IsString()){
-				v8::String::AsciiValue ascii(ret);
-				return DETOUR_MEMBER_CALL(PlayerPickHero)(a1, *ascii);
-			}
-		}
-	}
-
-	return DETOUR_MEMBER_CALL(PlayerPickHero)(a1, hero);
-}
 
 void CallGetAbilityValueHook(CBaseEntity *ability, AbilityData *data){
 	auto clsname = gamehelpers->GetEntityClassname((CBaseEntity*) ability);
-	/*if(data->root.type != FT_Array){
-		printf("Unknown ability root data type: %s.%s %d\n", clsname, data->field, data->root.type);
-		return;
-	}*/
-
 	auto entWrapper = GetEntityWrapper((CBaseEntity*) ability);
 
 	
@@ -155,7 +116,7 @@ void CallGetAbilityValueHook(CBaseEntity *ability, AbilityData *data){
 		for(auto it = hooks->begin(); it != hooks->end(); ++it){
 			auto func = *it;
 			auto ret = func->Call(pl->GetContext()->Global(), 4, args);
-			if(!ret.IsEmpty()){
+			if(!ret.IsEmpty() && !ret->IsUndefined()){
 				if(!ret->IsArray()) continue;
 				auto obj = ret->ToObject();
 				if(obj->Get(v8::String::New("length"))->Int32Value() != len) continue;
@@ -185,7 +146,6 @@ DETOUR_DECL_STATIC1_STDCALL_NAKED(GetAbilityValue, uint8_t *, char*, a2){
 
 		mov		ability, eax
 
-		mov		eax, a2
 		push	a2
 		mov		eax, ability
 		call	GetAbilityValue_Actual
@@ -207,6 +167,109 @@ FEND:
 		popfd
 		popad
 		mov		eax, data
+		leave
+		ret		4
+	}
+}
+
+const char* CallClientPickHero(CBaseEntity *client, CCommand *cmd, bool* block){
+	int len = GetNumPlugins();
+
+	auto clientWrapper = GetEntityWrapper(client);
+
+	*block = false;
+
+	for(int i = 0; i < len; ++i){
+		SMJS_Plugin *pl = GetPlugin(i);
+		if(pl == NULL) continue;
+		
+		HandleScope handle_scope(pl->GetIsolate());
+		Context::Scope context_scope(pl->GetContext());
+
+		auto hooks = pl->GetHooks("Dota_OnHeroPicked");
+
+		if(hooks->size() == 0) continue;
+		
+		if(pl->GetApiVersion() < 2){
+			v8::Handle<v8::Value> args = v8::String::New(cmd->Arg(1));
+
+			for(auto it = hooks->begin(); it != hooks->end(); ++it){
+				auto func = *it;
+				auto ret = func->Call(pl->GetContext()->Global(), 1, &args);
+				if(!ret.IsEmpty() && ret->IsString()){
+					v8::String::AsciiValue ascii(ret);
+					return *ascii;
+				}
+			}
+		}else{
+			v8::Handle<v8::Value> args[2];
+			args[0] = clientWrapper->GetWrapper(pl);
+			args[1] = v8::String::New(cmd->Arg(1));
+
+			for(auto it = hooks->begin(); it != hooks->end(); ++it){
+				auto func = *it;
+				auto ret = func->Call(pl->GetContext()->Global(), 2, args);
+				if(!ret.IsEmpty() && !ret->IsUndefined()){
+					if(ret->IsString()){
+						v8::String::AsciiValue ascii(ret);
+						char *str = new char[ascii.length() + 1];
+						strcpy(str, *ascii);
+						return str;
+					}else{
+						*block = true;
+						return NULL;
+					}
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
+	CBaseEntity *client;
+	const char *newHero;
+	bool block;
+
+	__asm {
+		push	ebp
+		mov		ebp, esp
+		sub		esp, 64
+
+		mov		client, esi
+	}
+
+	__asm pushad
+	__asm pushfd
+	
+	block = false;
+	newHero = CallClientPickHero(client, cmd, &block);
+
+	if(!block){
+		if(newHero == NULL){
+			__asm {
+				push	cmd
+				mov		esi, client
+				call	ClientPickHero_Actual
+			}
+		}else{
+			CCommand *tmp = new CCommand(*cmd);
+
+			tmp->ArgV()[1] = newHero;
+
+			__asm {
+				push	tmp
+				mov		esi, client
+				call	ClientPickHero_Actual
+			}
+
+			delete newHero;
+		}
+	}
+
+	__asm{
+		popfd
+		popad
 		leave
 		ret		4
 	}
@@ -234,14 +297,6 @@ MDota::MDota(){
 	
 	parseUnitDetour->EnableDetour();
 
-	playerPickHeroDetour = DETOUR_CREATE_MEMBER(PlayerPickHero, "PlayerPickHero");
-	if(!playerPickHeroDetour){
-		smutils->LogError(myself, "Unable to hook PlayerPickHero!");
-		return;
-	}
-	
-	playerPickHeroDetour->EnableDetour();
-
 	getAbilityValueDetour = DETOUR_CREATE_STATIC(GetAbilityValue, "GetAbilityValue");
 	if(!getAbilityValueDetour){
 		smutils->LogError(myself, "Unable to hook GetAbilityValue!");
@@ -250,7 +305,14 @@ MDota::MDota(){
 	
 	getAbilityValueDetour->EnableDetour();
 
+	clientPickHeroDetour = DETOUR_CREATE_STATIC(ClientPickHero, "ClientPickHero");
+	if(!clientPickHeroDetour){
+		smutils->LogError(myself, "Unable to hook ClientPickHero!");
+		return;
+	}
 	
+	clientPickHeroDetour->EnableDetour();
+
 
 	if(!dotaConf->GetMemSig("LoadParticleFile", &LoadParticleFile) || LoadParticleFile == NULL){
 		smutils->LogError(myself, "Couldn't sigscan LoadParticleFile");
