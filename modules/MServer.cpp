@@ -104,7 +104,7 @@ public:
 	}
 
 	WRAPPED_CLS(ClientArray, SMJS_BaseWrapped) {
-		temp->SetClassName(v8::String::New("ClientArray"));
+		temp->SetClassName(v8::String::NewSymbol("ClientArray"));
 		proto->Set("length", v8::Int32::New(MAXCLIENTS));
 		temp->InstanceTemplate()->SetIndexedPropertyHandler(GetClient);
 	}

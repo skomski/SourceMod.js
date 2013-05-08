@@ -36,7 +36,7 @@ public:
 	FUNCTION_DECL(resume);
 
 	WRAPPED_CLS(MGame, SMJS_Module) {
-		temp->SetClassName(v8::String::New("GameModule"));
+		temp->SetClassName(v8::String::NewSymbol("GameModule"));
 		
 		proto->Set("rules", v8::Null());
 
@@ -54,8 +54,8 @@ public:
 
 private:
 	void InitTeamNatives();
-	void OnServerActivate(edict_t *pEdictList, int edictCount, int clientMax);
-	void OnPreServerActivate(edict_t *pEdictList, int edictCount, int clientMax);
+	void OnServerActivate();
+	void OnPreServerActivate();
 	void OnThink(bool finalTick);
 	static void LevelShutdown();
 	static bool OnFireEvent(IGameEvent *pEvent, bool bDontBroadcast);

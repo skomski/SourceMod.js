@@ -20,11 +20,11 @@ void SMJS_ConVar::SetFlags(Local<String> prop, Local<Value> value, const Accesso
 	Local<Value> _intfld = info.This()->GetInternalField(0); 
 	SMJS_ConVar *self = dynamic_cast<SMJS_ConVar*>((SMJS_BaseWrapped*)Handle<External>::Cast(_intfld)->Value());
 
-	auto newFlags = value->Int32Value();
+	auto newFlags = (int) value->NumberValue();
 
 	int oldFlags = self->cv->GetFlags();
-	self->cv->RemoveFlags((oldFlags ^ newFlags) & oldFlags);
-	self->cv->AddFlags((oldFlags ^ newFlags) & newFlags);
+	if(((oldFlags ^ newFlags) & oldFlags) != 0) self->cv->RemoveFlags((oldFlags ^ newFlags) & oldFlags);
+	if(((oldFlags ^ newFlags) & newFlags) != 0) self->cv->AddFlags((oldFlags ^ newFlags) & newFlags);
 }
 
 FUNCTION_M(SMJS_ConVar::getBool)

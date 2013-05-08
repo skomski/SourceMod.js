@@ -10,7 +10,7 @@
 
 SH_DECL_HOOK6(IServerGameDLL, LevelInit, SH_NOATTRIB, false, bool, const char *, const char *, const char *, const char *, bool, bool);
 SH_DECL_HOOK0_void(IServerGameDLL, LevelShutdown, SH_NOATTRIB, false);
-SH_DECL_HOOK3_void(IServerGameDLL, ServerActivate, SH_NOATTRIB, 0, edict_t *, int, int);
+SH_DECL_HOOK0_void(IServerGameDLL, ServerActivate, SH_NOATTRIB, false);
 SH_DECL_HOOK1_void(IServerGameDLL, Think, SH_NOATTRIB, 0, bool);
 SH_DECL_HOOK2(IGameEventManager2, FireEvent, SH_NOATTRIB, 0, bool, IGameEvent *, bool);
 
@@ -47,11 +47,11 @@ void MGame::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wra
 	obj->Set(v8::String::New("rules"), rules.GetWrapper(plugin));
 }
 
-void MGame::OnPreServerActivate(edict_t *pEdictList, int edictCount, int clientMax){
+void MGame::OnPreServerActivate(){
 	ClearEntityWrappers();
 }
 
-void MGame::OnServerActivate(edict_t *pEdictList, int edictCount, int clientMax){
+void MGame::OnServerActivate(){
 	InitTeamNatives();
 
 	self->rules.rulesProps.proxy = FindEntityByClassname(-1, "dota_gamerules");

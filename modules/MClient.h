@@ -17,7 +17,7 @@ public:
 	void OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper);
 
 	WRAPPED_CLS(MClient, SMJS_Module) {
-		temp->SetClassName(v8::String::New("ClientModule"));
+		temp->SetClassName(v8::String::NewSymbol("ClientModule"));
 		
 	}
 

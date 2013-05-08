@@ -23,6 +23,17 @@ enum FieldType {
 	FT_Int = 5
 };
 
+struct AbilityField {
+	uint32_t flags1; // EE FF EE FF (LE)
+	union {
+		int32_t asInt;
+		float asFloat;
+	} value;
+		
+	uint32_t flags2; // EE FF EE FF (LE)
+	FieldType type;
+};
+
 struct AbilityData {
 	char *field;
 	char *strValue;
@@ -31,19 +42,11 @@ struct AbilityData {
 	struct {
 		int32_t		something;
 		FieldType	type;
-		uint32_t	flags;
 	} root;
 
-	struct {
-		union {
-			int32_t asInt;
-			float asFloat;
-		} value;
-		uint32_t flags1; // EE FF EE FF (LE)
+	AbilityField values[12];
 
-		FieldType type;
-		uint32_t flags2; // EE FF EE FF (LE)
-	} values[12];
+	uint32_t	flags;
 };
 
 DETOUR_DECL_MEMBER3(ParseUnit, void*, void*, a2, void*, a3, void*, a4){
@@ -294,38 +297,20 @@ MDota::MDota(){
 
 
 	parseUnitDetour = DETOUR_CREATE_MEMBER(ParseUnit, "ParseUnit");
-	if(!parseUnitDetour){
-		smutils->LogError(myself, "Unable to hook ParseUnit!");
-		return;
-	}
-	
-	parseUnitDetour->EnableDetour();
+	if(parseUnitDetour) parseUnitDetour->EnableDetour();
 
 	getAbilityValueDetour = DETOUR_CREATE_STATIC(GetAbilityValue, "GetAbilityValue");
-	if(!getAbilityValueDetour){
-		smutils->LogError(myself, "Unable to hook GetAbilityValue!");
-		return;
-	}
-	
-	getAbilityValueDetour->EnableDetour();
+	if(getAbilityValueDetour) getAbilityValueDetour->EnableDetour();
 
 	clientPickHeroDetour = DETOUR_CREATE_STATIC(ClientPickHero, "ClientPickHero");
-	if(!clientPickHeroDetour){
-		smutils->LogError(myself, "Unable to hook ClientPickHero!");
-		return;
-	}
+	if(clientPickHeroDetour) clientPickHeroDetour->EnableDetour();
 	
-	clientPickHeroDetour->EnableDetour();
-
-
 	if(!dotaConf->GetMemSig("LoadParticleFile", &LoadParticleFile) || LoadParticleFile == NULL){
 		smutils->LogError(myself, "Couldn't sigscan LoadParticleFile");
-		return;
 	}
 
 	if(!dotaConf->GetMemSig("CreateUnit", &CreateUnit) || CreateUnit == NULL){
 		smutils->LogError(myself, "Couldn't sigscan CreateUnit");
-		return;
 	}
 }
 
@@ -376,7 +361,7 @@ const char* MDota::HeroIdToClassname(int id) {
 		case Hero_Lion: return "npc_dota_hero_lion";
 		case Hero_ShadowShaman: return "npc_dota_hero_shadow_shaman";
 		case Hero_Slardar: return "npc_dota_hero_slardar";
-		case Hero_TideHunter: return "npc_dota_hero_tidehunter";
+		case Hero_Tidehunter: return "npc_dota_hero_tidehunter";
 		case Hero_WitchDoctor: return "npc_dota_hero_witch_doctor";
 		case Hero_Lich: return "npc_dota_hero_lich";
 		case Hero_Riki: return "npc_dota_hero_riki";
@@ -468,7 +453,7 @@ FUNCTION_M(MDota::forceWin)
 	PINT(team);
 	if(team != 2 && team != 3) THROW_VERB("Invalid team %d", team);
 
-	//WORKAROUND
+	//FIXME
 	auto cmd = icvar->FindCommand("dota_kill_buildings");
 	cmd->RemoveFlags(FCVAR_CHEAT);
 	engine->ServerCommand("dota_kill_buildings\n");
@@ -477,6 +462,8 @@ FUNCTION_M(MDota::forceWin)
 END
 
 FUNCTION_M(MDota::createUnit)
+	RETURN_UNDEF;
+	/*
 	PSTR(tmp);
 	PINT(team);
 	CBaseEntity *ent;
@@ -494,5 +481,5 @@ FUNCTION_M(MDota::createUnit)
 	
 	if(ent == NULL) return v8::Null();
 
-	RETURN_SCOPED(GetEntityWrapper(ent)->GetWrapper(GetPluginRunning()));
+	RETURN_SCOPED(GetEntityWrapper(ent)->GetWrapper(GetPluginRunning()));*/
 END

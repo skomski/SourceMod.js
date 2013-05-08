@@ -17,7 +17,7 @@ public:
 
 
 	WRAPPED_CLS(SMJS_DataMaps, SMJS_BaseWrapped) {
-		temp->SetClassName(v8::String::New("DataMaps"));
+		temp->SetClassName(v8::String::NewSymbol("DataMaps"));
 		temp->InstanceTemplate()->SetNamedPropertyHandler(SGetDataMap, SSetDataMap);
 	}
 

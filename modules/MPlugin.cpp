@@ -23,7 +23,7 @@ void MPlugin::OnPluginDestroyed(SMJS_Plugin *plugin){
 		pluginInterfaces[plugin->id] = v8::Persistent<v8::Object>();
 	}
 
-	for(auto it = interfaceAddedCallbacks.begin(); it != interfaceAddedCallbacks.end(); ++it){
+	for(auto it = interfaceAddedCallbacks.begin(); it != interfaceAddedCallbacks.end(); it != interfaceAddedCallbacks.end() ? ++it : interfaceAddedCallbacks.end()){
 		if(it->dir != plugin->GetDir()) continue;
 		it = interfaceAddedCallbacks.erase(it);
 	}

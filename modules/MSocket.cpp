@@ -60,7 +60,7 @@ public:
 	FUNCTION_DECL(writeBuffer);
 
 	SIMPLE_WRAPPED_CLS(JSSocket, SMJS_SimpleWrapped) {
-		temp->SetClassName(v8::String::New("Socket"));
+		temp->SetClassName(v8::String::NewSymbol("Socket"));
 
 		proto->Set("onClose", v8::Null());
 		proto->Set("onData", v8::Null());
@@ -161,49 +161,53 @@ void MSocket::Process(){
 		auto obj = jssocket->GetWrapper()->ToObject();
 
 		int received = socket.Receive(256);
-		if(socket.IsSocketValid() && received != 0){
-			if(!jssocket->connected) jssocket->connected = true;
-			do{
-				if(received <= 0){
-					if(socket.GetSocketError() != CSimpleSocket::SocketEwouldblock){
-						jssocket->connected = false;
+		if(jssocket->connected){
+			if(socket.IsSocketValid() && received != 0){
+				if(!jssocket->connected) jssocket->connected = true;
+				do{
+					if(received <= 0){
+						if(socket.GetSocketError() != CSimpleSocket::SocketEwouldblock){
+							jssocket->connected = false;
+							jssocket->Destroy();
 
-						auto callback = jssocket->GetWrapper()->ToObject()->Get(v8::String::New("onClose"));
+							auto callback = jssocket->GetWrapper()->ToObject()->Get(v8::String::New("onClose"));
 
-						if(callback->IsFunction()){
-							auto func = v8::Handle<v8::Function>::Cast(callback);
-							func->Call(obj, 0, NULL);
+							if(callback->IsFunction()){
+								auto func = v8::Handle<v8::Function>::Cast(callback);
+								func->Call(obj, 0, NULL);
+							}
 						}
+						break;
 					}
-					break;
-				}
 				
 				
-				auto callback = obj->Get(v8::String::New("onData"));
-				if(callback.IsEmpty() || callback->IsNull() || !callback->IsFunction()) continue;
+					auto callback = obj->Get(v8::String::New("onData"));
+					if(callback.IsEmpty() || callback->IsNull() || !callback->IsFunction()) continue;
 
-				auto func = v8::Handle<v8::Function>::Cast(callback);
+					auto func = v8::Handle<v8::Function>::Cast(callback);
 
-				uint8_t *ptr = new uint8_t[received + 1];
-				auto buffer = CreateBuffer(pl->GetIsolate(), ptr, received);
-				memcpy(ptr, socket.GetData(), received);
-				ptr[received] = '\0';
+					uint8_t *ptr = new uint8_t[received + 1];
+					auto buffer = CreateBuffer(pl->GetIsolate(), ptr, received);
+					memcpy(ptr, socket.GetData(), received);
+					ptr[received] = '\0';
 					
-				v8::Handle<v8::Value> args[1];
-				args[0] = buffer;
-				func->Call(obj, 1, args);
+					v8::Handle<v8::Value> args[1];
+					args[0] = buffer;
+					func->Call(obj, 1, args);
 
-				FreeBuffer(pl->GetIsolate(), buffer);
+					FreeBuffer(pl->GetIsolate(), buffer);
 
-			}while((received = socket.Receive(256)) != 0);
-		}else if(jssocket->connected){
-			jssocket->connected = false;
+				}while((received = socket.Receive(256)) != 0);
+			}else{
+				jssocket->connected = false;
+				jssocket->Destroy();
 
-			auto callback = jssocket->GetWrapper()->ToObject()->Get(v8::String::New("onClose"));
+				auto callback = jssocket->GetWrapper()->ToObject()->Get(v8::String::New("onClose"));
 
-			if(callback->IsFunction()){
-				auto func = v8::Handle<v8::Function>::Cast(callback);
-				func->Call(obj, 0, NULL);
+				if(callback->IsFunction()){
+					auto func = v8::Handle<v8::Function>::Cast(callback);
+					func->Call(obj, 0, NULL);
+				}
 			}
 		}
 	}

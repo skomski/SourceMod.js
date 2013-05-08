@@ -16,15 +16,21 @@ class SMJS_CheckerThread : public SourceMod::IThread{
 		while(1){
 			pingMutex->Lock();
 
-#ifndef _DEBUG
 			int now = time(NULL);
 			if(!isPaused && now - lastPing > 30){
 				v8::V8::TerminateExecution(mainIsolate);
 				printf("SERVER STOPPED THINKING, QUITTING\n");
 				threader->ThreadSleep(3000);
-				throw "Script timed out";
-			}
+
+				// In production, just let the server die so it can be restarted
+				// Otherwise we'd have to close the dialog that Windows creates before
+				// the server is restarted again
+#ifdef DEBUG
+				abort();
+#else
+				exit(3);
 #endif
+			}
 
 			pingMutex->Unlock();
 			threader->ThreadSleep(1000);

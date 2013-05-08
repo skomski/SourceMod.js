@@ -28,7 +28,7 @@ public:
 	FUNCTION_DECL(setString);
 	
 	SIMPLE_WRAPPED_CLS(SMJS_ConVar, SMJS_SimpleWrapped){
-		temp->SetClassName(v8::String::New("ConVar"));
+		temp->SetClassName(v8::String::NewSymbol("ConVar"));
 
 		WRAPPED_FUNC(getName);
 		temp->InstanceTemplate()->SetAccessor(v8::String::New("flags"), GetFlags, SetFlags);

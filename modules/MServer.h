@@ -22,7 +22,7 @@ public:
 	FUNCTION_DECL(log);
 
 	WRAPPED_CLS(MServer, SMJS_Module) {
-		temp->SetClassName(v8::String::New("ServerModule"));
+		temp->SetClassName(v8::String::NewSymbol("ServerModule"));
 
 		proto->Set(v8::String::New("isDedicated"), v8::Boolean::New(engine->IsDedicatedServer()), ReadOnly);
 		proto->Set(v8::String::New("clients"), v8::Null());

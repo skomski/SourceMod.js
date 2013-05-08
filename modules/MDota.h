@@ -33,7 +33,7 @@ enum Dota_Hero {
 	Hero_Lion = 26,
 	Hero_ShadowShaman = 27,
 	Hero_Slardar = 28,
-	Hero_TideHunter = 29,
+	Hero_Tidehunter = 29,
 	Hero_WitchDoctor = 30,
 	Hero_Lich = 31,
 	Hero_Riki = 32,
@@ -129,7 +129,7 @@ public:
 	
 
 	WRAPPED_CLS(MDota, SMJS_Module) {
-		temp->SetClassName(v8::String::New("DotaModule"));
+		temp->SetClassName(v8::String::NewSymbol("DotaModule"));
 
 		WRAPPED_FUNC(heroIdToClassname);
 		WRAPPED_FUNC(loadParticleFile);
@@ -137,6 +137,16 @@ public:
 		WRAPPED_FUNC(createUnit);
 
 		proto->Set(v8::String::New("MAX_PLAYERS"), v8::Int32::New(24), v8::ReadOnly);
+
+		proto->Set(v8::String::New("STATE_INIT"), v8::Int32::New(0), v8::ReadOnly);
+		proto->Set(v8::String::New("STATE_WAIT_FOR_PLAYERS_TO_LOAD"), v8::Int32::New(1), v8::ReadOnly);
+		proto->Set(v8::String::New("STATE_HERO_SELECTION"), v8::Int32::New(2), v8::ReadOnly);
+		proto->Set(v8::String::New("STATE_STRATEGY_TIME"), v8::Int32::New(3), v8::ReadOnly);
+		proto->Set(v8::String::New("STATE_PRE_GAME"), v8::Int32::New(4), v8::ReadOnly);
+		proto->Set(v8::String::New("STATE_GAME_IN_PROGRESS"), v8::Int32::New(5), v8::ReadOnly);
+		proto->Set(v8::String::New("STATE_POST_GAME"), v8::Int32::New(6), v8::ReadOnly);
+		proto->Set(v8::String::New("STATE_DISCONNECT"), v8::Int32::New(7), v8::ReadOnly);
+		
 
 		proto->Set(v8::String::New("TEAM_NONE"), v8::Int32::New(0), v8::ReadOnly);
 		proto->Set(v8::String::New("TEAM_SPEC"), v8::Int32::New(1), v8::ReadOnly);
@@ -300,12 +310,12 @@ public:
 		HERO_ID_CONST(SLITHEREEN_GUARD, Slardar);
 		HERO_ID_CONST(SLITHEREENGUARD, Slardar);
 
-		HERO_ID_CONST(TIDEHUNTER, TideHunter);
-		HERO_ID_CONST(TIDE_HUNTER, TideHunter);
-		HERO_ID_CONST(TIDE, TideHunter);
-		HERO_ID_CONST(TH, TideHunter);
-		HERO_ID_CONST(LEVIATHAN, TideHunter);
-		HERO_ID_CONST(LEV, TideHunter);
+		HERO_ID_CONST(TIDEHUNTER, Tidehunter);
+		HERO_ID_CONST(TIDE_HUNTER, Tidehunter);
+		HERO_ID_CONST(TIDE, Tidehunter);
+		HERO_ID_CONST(TH, Tidehunter);
+		HERO_ID_CONST(LEVIATHAN, Tidehunter);
+		HERO_ID_CONST(LEV, Tidehunter);
 
 		HERO_ID_CONST(SKELETONKING, SkeletonKing);
 		HERO_ID_CONST(SKELETON_KING, SkeletonKing);

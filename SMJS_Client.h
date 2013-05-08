@@ -30,7 +30,7 @@ public:
 	FUNCTION_DECL(kick);
 
 	WRAPPED_CLS(SMJS_Client, SMJS_Entity) {
-		temp->SetClassName(v8::String::New("Client"));
+		temp->SetClassName(v8::String::NewSymbol("Client"));
 		WRAPPED_FUNC(printToChat);
 		WRAPPED_FUNC(printToConsole);
 		WRAPPED_FUNC(isInGame);

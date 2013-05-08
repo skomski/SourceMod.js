@@ -307,6 +307,8 @@ FUNCTION_M(MConsole::findConVar)
 
 	auto smjsCv = new SMJS_ConVar(plugin, cv);
 	auto wrap = smjsCv->GetWrapper();
+	// Make sure to make a copy of that so ->Destroy doesn't destroy everything
+	v8::Handle<v8::Value> cpy = wrap;
 	smjsCv->Destroy();
-	RETURN_SCOPED(wrap);
+	RETURN_SCOPED(cpy);
 END

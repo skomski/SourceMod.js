@@ -12,7 +12,7 @@ public:
 	//FUNCTION_DECL(resume);
 
 	WRAPPED_CLS(MEngine, SMJS_Module) {
-		temp->SetClassName(v8::String::New("EngineModule"));
+		temp->SetClassName(v8::String::NewSymbol("EngineModule"));
 		
 		//WRAPPED_FUNC(resume);
 	}

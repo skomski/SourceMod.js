@@ -6,6 +6,6 @@ private:
 	virtual void Nothing(){}
 };
 
-#define WRAPPED_FUNC(name) proto->Set(v8::String::New(#name), v8::FunctionTemplate::New(name));
+#define WRAPPED_FUNC(name) proto->Set(v8::String::NewSymbol(#name), v8::FunctionTemplate::New(name));
 
 #endif

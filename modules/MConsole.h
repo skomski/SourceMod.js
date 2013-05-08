@@ -38,7 +38,7 @@ public:
 	FUNCTION_DECL(findConVar);
 
 	WRAPPED_CLS(MConsole, SMJS_Module) {
-		temp->SetClassName(v8::String::New("ConsoleModule"));
+		temp->SetClassName(v8::String::NewSymbol("ConsoleModule"));
 		
 #define FCVAR_TYPE(type) proto->Set(#type, v8::Int32::New(type));
 

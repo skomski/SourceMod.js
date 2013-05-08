@@ -43,7 +43,7 @@ public:
 
 	
 	WRAPPED_CLS(SMJS_Netprops, SMJS_BaseWrapped) {
-		temp->SetClassName(v8::String::New("Netprops"));
+		temp->SetClassName(v8::String::NewSymbol("Netprops"));
 		temp->InstanceTemplate()->SetNamedPropertyHandler(SGetNetProp, SSetNetProp);
 	}
 
@@ -96,7 +96,7 @@ public:
 	}
 
 	SIMPLE_WRAPPED_CLS(SMJS_DataTable, SMJS_SimpleWrapped){
-		temp->SetClassName(v8::String::New("DataTable"));
+		temp->SetClassName(v8::String::NewSymbol("DataTable"));
 		temp->InstanceTemplate()->SetIndexedPropertyHandler(DTGetter, DTSetter, NULL, NULL, NULL);
 	}
 

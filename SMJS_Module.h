@@ -27,7 +27,7 @@ public:
 	void OnPluginDestroyed(SMJS_Plugin *plugin){};
 
 	WRAPPED_CLS(SMJS_Module, SMJS_BaseWrapped) {
-		temp->SetClassName(v8::String::New("Module"));
+		temp->SetClassName(v8::String::NewSymbol("Module"));
 	}
 
 	v8::Handle<Value> CallGlobalFunctionWithWrapped(const char* name, SMJS_BaseWrapped *wrapped, SMJS_Plugin **retPlugin = NULL, bool earlyReturn = false);

@@ -21,7 +21,7 @@ public:
 
 
 	WRAPPED_CLS(MEntities, SMJS_Module) {
-		temp->SetClassName(v8::String::New("EntitiesModule"));
+		temp->SetClassName(v8::String::NewSymbol("EntitiesModule"));
 	}
 
 	

@@ -47,7 +47,7 @@ public:
 	FUNCTION_DECL(block);
 
 	WRAPPED_CLS(SMJS_Event, SMJS_BaseWrapped) {
-		temp->SetClassName(v8::String::New("Event"));
+		temp->SetClassName(v8::String::NewSymbol("Event"));
 
 		proto->Set("name", v8::Null());
 

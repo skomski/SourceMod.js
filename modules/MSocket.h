@@ -20,7 +20,7 @@ public:
 	FUNCTION_DECL(getStringLength);
 
 	WRAPPED_CLS(MSocket, SMJS_Module) {
-		temp->SetClassName(v8::String::New("SocketModule"));
+		temp->SetClassName(v8::String::NewSymbol("SocketModule"));
 		
 		WRAPPED_FUNC(create);
 		WRAPPED_FUNC(createBuffer);

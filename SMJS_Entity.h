@@ -35,7 +35,7 @@ public:
 	FUNCTION_DECL(setData);
 
 	WRAPPED_CLS(SMJS_Entity, SMJS_BaseWrapped) {
-		temp->SetClassName(v8::String::New("Entity"));
+		temp->SetClassName(v8::String::NewSymbol("Entity"));
 
 		proto->Set(v8::String::New("index"), v8::Int32::New(-1));
 		proto->Set("netprops", v8::Null());

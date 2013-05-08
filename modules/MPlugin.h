@@ -30,7 +30,7 @@ public:
 	FUNCTION_DECL(getApiVersion);
 
 	WRAPPED_CLS(MPlugin, SMJS_Module) {
-		temp->SetClassName(v8::String::New("PluginModule"));
+		temp->SetClassName(v8::String::NewSymbol("PluginModule"));
 
 		WRAPPED_FUNC(isSandboxed);
 		WRAPPED_FUNC(loadPlugin);
