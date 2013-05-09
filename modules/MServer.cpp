@@ -111,9 +111,16 @@ public:
 
 	static v8::Handle<v8::Value> GetClient(uint32_t index, const AccessorInfo& info){
 		if(index >= MAXCLIENTS) RETURN_UNDEF;
-		if(index == 0) return v8::Null();
-		if(clients[index] == NULL) return v8::Null();
-		return clients[index]->GetWrapper(GetPluginRunning());
+
+		if(GetPluginRunning()->GetApiVersion() < 3){
+			if(index == 0) return v8::Null();
+			if(clients[index] == NULL) return v8::Null();
+			return clients[index]->GetWrapper(GetPluginRunning());
+		}else{
+			if(clients[index + 1] == NULL) return v8::Null();
+			if(index >= MAXCLIENTS) return v8::Null();
+			return clients[index + 1]->GetWrapper(GetPluginRunning());
+		}
 	}
 };
 
