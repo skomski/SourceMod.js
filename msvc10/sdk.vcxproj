@@ -1234,7 +1234,7 @@
     <ClCompile Include="..\SMJS_Module.cpp" />
     <ClCompile Include="..\SMJS_Netprops.cpp" />
     <ClCompile Include="..\SMJS_Plugin.cpp" />
-    <ClCompile Include="SMJS_SimpleWrapped.cpp" />
+    <ClCompile Include="..\SMJS_SimpleWrapped.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\asm\asm.h" />
