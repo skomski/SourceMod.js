@@ -198,7 +198,15 @@ SMJS_Plugin *LoadPlugin(const char *dir){
 	auto plugin = SMJS_Plugin::GetPluginByDir(dir);
 	if(plugin != NULL) return plugin;
 
-	plugin = new SMJS_Plugin();
+	bool isSandboxed = true;
+	for(auto it = trustedPlugins.begin(); it != trustedPlugins.end(); ++it){
+		if(strcmp(dir, it->c_str()) == 0){
+			isSandboxed = false;
+			break;
+		}
+	}
+
+	plugin = new SMJS_Plugin(isSandboxed);
 
 	char path[512];
 	smutils->BuildPath(Path_SM, path, sizeof(path), "plugins.js/%s", dir);
@@ -208,12 +216,6 @@ SMJS_Plugin *LoadPlugin(const char *dir){
 	plugin->SetPath(path);
 	plugin->CheckApi();
 
-	for(auto it = trustedPlugins.begin(); it != trustedPlugins.end(); ++it){
-		if(strcmp(dir, it->c_str()) == 0){
-			plugin->isSandboxed = false;
-			break;
-		}
-	}
 
 	plugin->LoadModules();
 

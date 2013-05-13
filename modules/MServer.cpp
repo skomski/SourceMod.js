@@ -19,7 +19,7 @@ FUNCTION_M(MServer::print)
 END
 
 FUNCTION_M(MServer::command)
-	if(GetPluginRunning()->isSandboxed) THROW("Function not available in sandboxed plugins");
+	if(GetPluginRunning()->IsSandboxed()) THROW("Function not available in sandboxed plugins");
 
 	ARG_COUNT(1);
 	PSTR(str);
@@ -35,7 +35,7 @@ FUNCTION_M(MServer::command)
 END
 
 FUNCTION_M(MServer::execute)
-	if(GetPluginRunning()->isSandboxed) THROW("Function not available in sandboxed plugins");
+	if(GetPluginRunning()->IsSandboxed()) THROW("Function not available in sandboxed plugins");
 	
 	ARG_COUNT(0);
 	engine->ServerExecute();

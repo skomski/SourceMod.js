@@ -28,6 +28,7 @@ public:
 	FUNCTION_DECL(isSourceTV);
 	FUNCTION_DECL(getAuthString);
 	FUNCTION_DECL(kick);
+	FUNCTION_DECL(changeTeam);
 
 	WRAPPED_CLS(SMJS_Client, SMJS_Entity) {
 		temp->SetClassName(v8::String::NewSymbol("Client"));
@@ -40,7 +41,7 @@ public:
 		WRAPPED_FUNC(isSourceTV);
 		WRAPPED_FUNC(getAuthString);
 		WRAPPED_FUNC(kick);
-
+		WRAPPED_FUNC(changeTeam);
 	}
 
 private:

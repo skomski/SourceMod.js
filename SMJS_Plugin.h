@@ -37,9 +37,9 @@ public: // Public variables
 	v8::Isolate *isolate;
 	v8::Persistent<v8::Context> context;
 	int apiVersion;
-	bool isSandboxed;
 
 protected: // Protected variables
+	bool isSandboxed;
 	std::string path;
 	std::string dir;
 
@@ -52,19 +52,18 @@ protected: // Protected variables
 	std::map<std::string, std::vector<v8::Persistent<v8::Function>>> eventPostHooks;
 
 public: // Public functions
-	SMJS_Plugin();
+	SMJS_Plugin(bool isSandboxed);
 	~SMJS_Plugin();
-	// Virtuals for the public interface, do NOT change the order
-	virtual PLUGIN_ID GetId(){return id;}
-	virtual v8::Persistent<v8::Context> GetContext(){return context;}
-	virtual v8::Isolate *GetIsolate(){return isolate;}
-	virtual void RegisterDestroyCallback(DestroyCallback func);
-	virtual void RegisterDestroyCallback(IPluginDestroyedHandler *ptr);
-	//virtual int GetApiVersion(char const *id, int curVersion){return curVersion;};
-	virtual std::vector<v8::Persistent<v8::Function>>* GetHooks(char const *type);
-	virtual std::vector<v8::Persistent<v8::Function>>* GetEventHooks(char const *type);
-	virtual std::vector<v8::Persistent<v8::Function>>* GetEventPostHooks(char const *type);
-	// 
+	PLUGIN_ID GetId(){return id;}
+	v8::Persistent<v8::Context> GetContext(){return context;}
+	v8::Isolate *GetIsolate(){return isolate;}
+	void RegisterDestroyCallback(DestroyCallback func);
+	void RegisterDestroyCallback(IPluginDestroyedHandler *ptr);
+	std::vector<v8::Persistent<v8::Function>>* GetHooks(char const *type);
+	std::vector<v8::Persistent<v8::Function>>* GetEventHooks(char const *type);
+	std::vector<v8::Persistent<v8::Function>>* GetEventPostHooks(char const *type);
+	
+	bool IsSandboxed(){return isSandboxed;};
 
 	bool RunString(const char* name, const char *source, bool asGlobal, v8::Handle<v8::Value> *result = NULL);
 	bool LoadFile(const char* file, bool asGlobal, v8::Handle<v8::Value> *result = NULL);
@@ -95,6 +94,7 @@ public: // Public functions
 	static SMJS_Plugin *GetPluginByDir(const char *dir);
 
 private: // Private functions
+	SMJS_Plugin();
 	void ReportException(v8::TryCatch* try_catch);
 
 

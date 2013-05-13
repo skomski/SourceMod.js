@@ -394,14 +394,14 @@ void pauseGame(){
 }
 
 FUNCTION_M(MGame::pause)
-	if(GetPluginRunning()->isSandboxed) THROW("This function is not allowed to be called in sandboxed plugins");
+	if(GetPluginRunning()->IsSandboxed()) THROW("This function is not allowed to be called in sandboxed plugins");
 	v8::V8::AddCallCompletedCallback(pauseGame);
 	
 	RETURN_UNDEF;
 END
 
 FUNCTION_M(MGame::resume)
-	if(GetPluginRunning()->isSandboxed) THROW("This function is not allowed to be called in sandboxed plugins");
+	if(GetPluginRunning()->IsSandboxed()) THROW("This function is not allowed to be called in sandboxed plugins");
 	SMJS_Resume();
 	RETURN_UNDEF;
 END

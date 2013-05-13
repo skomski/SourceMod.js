@@ -2,18 +2,18 @@
 #include "SMJS_Plugin.h"
 #include "MEntities.h"
 
-SH_DECL_HOOK5(IServerGameClients, ClientConnect, SH_NOATTRIB, 0, bool, edict_t *, const char *, const char *, char *, int);
-SH_DECL_HOOK2_void(IServerGameClients, ClientPutInServer, SH_NOATTRIB, 0, edict_t *, const char *);
-SH_DECL_HOOK1_void(IServerGameClients, ClientDisconnect, SH_NOATTRIB, 0, edict_t *);
-SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *, const CCommand &);
-SH_DECL_HOOK1_void(IServerGameClients, ClientSettingsChanged, SH_NOATTRIB, 0, edict_t *);
+SH_DECL_HOOK5(IServerGameClients, ClientConnect, SH_NOATTRIB, 0, bool, int, const char *, const char *, char *, int);
+SH_DECL_HOOK2_void(IServerGameClients, ClientPutInServer, SH_NOATTRIB, 0, int, const char *);
+SH_DECL_HOOK1_void(IServerGameClients, ClientDisconnect, SH_NOATTRIB, 0, int);
+SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, int, const CCommand &);
+SH_DECL_HOOK1_void(IServerGameClients, ClientSettingsChanged, SH_NOATTRIB, 0, int);
 
-bool OnClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen);
-bool OnClientConnect_Post(edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen);
-void OnClientPutInServer(edict_t *pEntity, const char *playername);
-void OnClientDisconnect(edict_t *pEntity);
-void OnClientDisconnect_Post(edict_t *pEntity);
-void OnClientCommand(edict_t *pEntity, const CCommand &args);
+bool OnClientConnect(int client, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen);
+bool OnClientConnect_Post(int client, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen);
+void OnClientPutInServer(int client, const char *playername);
+void OnClientDisconnect(int clientIndex);
+void OnClientDisconnect_Post(int clientIndex);
+void OnClientCommand(int client, const CCommand &args);
 
 SMJS_Client *clients[MAXCLIENTS];
 
@@ -57,7 +57,7 @@ void MClient::RunAuthChecks(){
 		if(client->authStage == 2) continue;
 		
 		if(client->authStage == 0){
-			const char *authid = engine->GetPlayerNetworkIDString(client->edict);
+			const char *authid = engine->GetPlayerNetworkIDString(client->entIndex);
 			if(authid == NULL) continue;
 			client->authStage = 1;
 
@@ -65,7 +65,7 @@ void MClient::RunAuthChecks(){
 		}
 
 		if(client->authStage == 1){
-			if(engine->IsClientFullyAuthenticated(client->edict)){
+			if(engine->IsClientFullyAuthenticated(client->entIndex)){
 				client->authStage = 2;
 				self->CallGlobalFunctionWithWrapped("OnClientAuthorized", client);
 			}
@@ -74,7 +74,8 @@ void MClient::RunAuthChecks(){
 	
 }
 
-bool OnClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen){
+bool OnClientConnect(int clientIndex, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen){
+	edict_t *pEntity = gamehelpers->EdictOfIndex(clientIndex);
 	auto client = new SMJS_Client(pEntity);
 	clients[client->entIndex] = client;
 
@@ -94,18 +95,19 @@ bool OnClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddre
 	return true;
 }
 
-bool OnClientConnect_Post(edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen){
-	auto client = clients[gamehelpers->IndexOfEdict(pEntity)];
+bool OnClientConnect_Post(int clientIndex, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen){
+	auto client = clients[clientIndex];
 	client->connected = true;
 	self->CallGlobalFunctionWithWrapped("OnClientConnected", client);
 	return true;
 }
 
-void OnClientPutInServer(edict_t *pEntity, const char *playername){
-	auto client = clients[gamehelpers->IndexOfEdict(pEntity)];
+void OnClientPutInServer(int clientIndex, const char *playername){
+	auto client = clients[clientIndex];
 
 	// If it's a bot
 	if(client == NULL){
+		edict_t *pEntity = gamehelpers->EdictOfIndex(clientIndex);
 		client = new SMJS_Client(pEntity);
 		clients[client->entIndex] = client;
 		client->ReattachEntity();
@@ -119,15 +121,13 @@ void OnClientPutInServer(edict_t *pEntity, const char *playername){
 }
 
 int clientIndexThatJustDisconnected;
-void OnClientDisconnect(edict_t *pEntity){
-	auto client = clients[gamehelpers->IndexOfEdict(pEntity)];
+void OnClientDisconnect(int clientIndex){
+	auto client = clients[clientIndex];
 	self->CallGlobalFunctionWithWrapped("OnClientDisconnect", client);
 }
 
-void OnClientDisconnect_Post(edict_t *pEntity){
-	int index = gamehelpers->IndexOfEdict(pEntity);
-	if(index == -1) return;
-	auto client = clients[index];
+void OnClientDisconnect_Post(int clientIndex){
+	auto client = clients[clientIndex];
 
 	// It seems OnClientDisconnect_Post is called multiple times, if it's already been called, don't run
 	// this function again
@@ -139,9 +139,9 @@ void OnClientDisconnect_Post(edict_t *pEntity){
 
 	client->entIndex = -1;
 	client->Destroy();
-	clients[index] = NULL;
+	clients[clientIndex] = NULL;
 }
 
-void OnClientCommand(edict_t *pEntity, const CCommand &args){
+void OnClientCommand(int client, const CCommand &args){
 
 }

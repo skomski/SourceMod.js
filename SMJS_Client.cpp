@@ -69,14 +69,14 @@ FUNCTION_M(SMJS_Client::fakeCommand)
 	GET_INTERNAL(SMJS_Client*, self);
 	if(!self->valid) THROW("Invalid entity");
 	PSTR(str);
-	engine->ClientCommand(self->edict, *str);
+	engine->ClientCommand(self->entIndex, *str);
 	RETURN_UNDEF;
 END
 
 FUNCTION_M(SMJS_Client::getAuthString)
 	GET_INTERNAL(SMJS_Client*, self);
 	if(self->edict == NULL) THROW("Invalid edict");
-	RETURN_SCOPED(v8::String::New(engine->GetPlayerNetworkIDString(self->edict)));
+	RETURN_SCOPED(v8::String::New(engine->GetPlayerNetworkIDString(self->entIndex)));
 END
 
 FUNCTION_M(SMJS_Client::kick)
@@ -91,6 +91,16 @@ FUNCTION_M(SMJS_Client::kick)
 	}
 		
 	gameplayer->Kick(kickReason);
+
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(SMJS_Client::changeTeam)
+	GET_INTERNAL(SMJS_Client*, self);
+	PINT(team);
+
+	if(!self->valid) THROW("Invalid entity");
+	playerhelpers->GetGamePlayer(self->edict)->GetPlayerInfo()->ChangeTeam(team);
 
 	RETURN_UNDEF;
 END

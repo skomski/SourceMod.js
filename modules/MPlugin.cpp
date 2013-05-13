@@ -31,12 +31,12 @@ void MPlugin::OnPluginDestroyed(SMJS_Plugin *plugin){
 
 
 FUNCTION_M(MPlugin::isSandboxed)
-	RETURN_SCOPED(v8::Boolean::New(GetPluginRunning()->isSandboxed));
+	RETURN_SCOPED(v8::Boolean::New(GetPluginRunning()->IsSandboxed()));
 END
 
 	
 FUNCTION_M(MPlugin::loadPlugin)
-	if(GetPluginRunning()->isSandboxed) THROW("This function is not allowed to be called in sandboxed plugins");
+	if(GetPluginRunning()->IsSandboxed()) THROW("This function is not allowed to be called in sandboxed plugins");
 	
 	PSTR(dir);
 	RETURN_SCOPED(v8::Boolean::New(LoadPlugin(*dir) != NULL));

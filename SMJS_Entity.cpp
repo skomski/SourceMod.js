@@ -254,3 +254,30 @@ FUNCTION_M(SMJS_Entity::setData)
 
 	RETURN_UNDEF;
 END
+
+FUNCTION_M(SMJS_Entity::getData)
+	GET_INTERNAL(SMJS_Entity*, self);
+
+	PINT(offset);
+	PINT(size);
+
+	if(offset < 0 || offset > (2 << 15)){
+		THROW_VERB("Invalid offset %d", offset);
+	}
+
+	switch(size){
+	case 1:
+		RETURN_INT(*(uint8_t*)((intptr_t) self->ent + offset));
+		break;
+	case 2:
+		RETURN_INT(*(uint16_t*)((intptr_t) self->ent + offset));
+		break;
+	case 4:
+		RETURN_INT(*(uint32_t*)((intptr_t) self->ent + offset));
+		break;
+
+	default: THROW_VERB("Invalid size %d", size);
+	}
+
+	RETURN_UNDEF;
+END

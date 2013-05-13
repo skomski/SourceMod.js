@@ -32,11 +32,11 @@ SMJS_Plugin* SMJS_Plugin::GetPluginByDir(const char *dir){
 	return NULL;
 }
 
-SMJS_Plugin::SMJS_Plugin(){
+SMJS_Plugin::SMJS_Plugin(bool isSandboxed){
 	apiVersion = SMJS_API_VERSION;
-	isSandboxed = true;
 	id = numPlugins++;
 	plugins.push_back(this);
+	this->isSandboxed = isSandboxed;
 
 	isolate = mainIsolate; //v8::Isolate::New();
 
@@ -49,6 +49,11 @@ SMJS_Plugin::SMJS_Plugin(){
 
 	context = v8::Context::New(NULL, global);
 	context->SetEmbedderData(1, v8::External::New(this));
+
+	if(isSandboxed){
+		context->AllowCodeGenerationFromStrings(false);
+		context->SetErrorMessageForCodeGenerationFromStrings(v8::String::New("Sandboxed scripts cannot generate code from strings"));
+	}
 }
 
 void SMJS_Plugin::LoadModules(){
