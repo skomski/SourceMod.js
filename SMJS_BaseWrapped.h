@@ -44,7 +44,7 @@ public:
 		auto it = templates.find(plugin->id); \
 		if(it != templates.end()) return it->second; \
 		 \
-		auto temp = v8::Persistent<v8::FunctionTemplate>::New(v8::FunctionTemplate::New());; \
+		auto temp = v8::Persistent<v8::FunctionTemplate>::New(v8::FunctionTemplate::New()); \
 		 \
 		auto inst = temp->InstanceTemplate(); \
 		inst->SetInternalFieldCount(1); \

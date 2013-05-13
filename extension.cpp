@@ -92,6 +92,7 @@ bool SMJS::SDK_OnLoad(char *error, size_t maxlength, bool late){
 	RegCommand("js_unload", CmdUnloadPlugin);
 	RegCommand("js_reload", CmdReloadPlugin);
 
+	//SMJS_AddModule(new MEngine());
 	SMJS_AddModule(new MPlugin());
 	SMJS_AddModule(new MConsole());
 	SMJS_AddModule(new MServer());
@@ -116,11 +117,7 @@ void SMJS::SDK_OnAllLoaded(){
 }
 
 bool SMJS::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlength, bool late){
-	bool res = SMJS_InitInterfaces(ismm, error, maxlength, late);
-	if(res){
-		SMJS_AddModule(new MEngine());
-	}
-	return res;
+	return SMJS_InitInterfaces(ismm, error, maxlength, late);
 }
 
 bool LoadTrustedList(){
