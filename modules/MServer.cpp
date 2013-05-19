@@ -105,8 +105,16 @@ public:
 
 	WRAPPED_CLS(ClientArray, SMJS_BaseWrapped) {
 		temp->SetClassName(v8::String::NewSymbol("ClientArray"));
-		proto->Set("length", v8::Int32::New(MAXCLIENTS));
+		proto->Set("length", v8::Int32::New(0));
 		temp->InstanceTemplate()->SetIndexedPropertyHandler(GetClient);
+	}
+
+	virtual void OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
+		if(GetPluginRunning()->GetApiVersion() < 3){
+			wrapper->ToObject()->Set(v8::String::NewSymbol("length"), v8::Int32::New(MAXCLIENTS + 1), v8::ReadOnly);
+		}else{
+			wrapper->ToObject()->Set(v8::String::NewSymbol("length"), v8::Int32::New(MAXCLIENTS), v8::ReadOnly);
+		}
 	}
 
 	static v8::Handle<v8::Value> GetClient(uint32_t index, const AccessorInfo& info){
@@ -114,11 +122,12 @@ public:
 
 		if(GetPluginRunning()->GetApiVersion() < 3){
 			if(index == 0) return v8::Null();
+			if(index >= MAXCLIENTS) return v8::Null();
 			if(clients[index] == NULL) return v8::Null();
 			return clients[index]->GetWrapper(GetPluginRunning());
 		}else{
 			if(clients[index + 1] == NULL) return v8::Null();
-			if(index >= MAXCLIENTS) return v8::Null();
+			if(index + 1 >= MAXCLIENTS) return v8::Null();
 			return clients[index + 1]->GetWrapper(GetPluginRunning());
 		}
 	}
