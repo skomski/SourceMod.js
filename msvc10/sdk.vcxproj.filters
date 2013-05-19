@@ -113,6 +113,9 @@
     <ClCompile Include="..\SMJS_SimpleWrapped.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\SMJS_VKeyValues.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extension.h">
@@ -243,6 +246,9 @@
     </ClInclude>
     <ClInclude Include="..\modules\MEngine.h">
       <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMJS_VKeyValues.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

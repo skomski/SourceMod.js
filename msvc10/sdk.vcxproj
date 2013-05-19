@@ -1235,6 +1235,7 @@
     <ClCompile Include="..\SMJS_Netprops.cpp" />
     <ClCompile Include="..\SMJS_Plugin.cpp" />
     <ClCompile Include="..\SMJS_SimpleWrapped.cpp" />
+    <ClCompile Include="..\SMJS_VKeyValues.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\asm\asm.h" />
@@ -1280,6 +1281,7 @@
     <ClInclude Include="..\SMJS_Netprops.h" />
     <ClInclude Include="..\SMJS_Plugin.h" />
     <ClInclude Include="..\SMJS_SimpleWrapped.h" />
+    <ClInclude Include="..\SMJS_VKeyValues.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -27,7 +27,7 @@ FUNCTION_M(SMJS_Client::printToChat)
 	if(!self->valid) THROW("Invalid entity");
 	
 	PSTR(str);
-
+	
 	gamehelpers->TextMsg(self->entIndex, TEXTMSG_DEST_CHAT, *str);
 	RETURN_UNDEF;
 END

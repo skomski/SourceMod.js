@@ -3,6 +3,7 @@
 #include "modules/MEntities.h"
 #include "CDetour/detours.h"
 #include "SMJS_Entity.h"
+#include "SMJS_VKeyValues.h"
 
 
 
@@ -49,10 +50,11 @@ struct AbilityData {
 	uint32_t	flags;
 };
 
-DETOUR_DECL_MEMBER3(ParseUnit, void*, void*, a2, void*, a3, void*, a4){
-	void *ret = DETOUR_MEMBER_CALL(ParseUnit)(a2, a3, a4);
+DETOUR_DECL_MEMBER3(ParseUnit, void*, void*, a2, KeyValues*, keyvalues, void*, a4){
 	SMJS_Entity *entWrapper = GetEntityWrapper((CBaseEntity*) this);
 	
+	SMJS_VKeyValues *kv = NULL;
+
 	int len = GetNumPlugins();
 	for(int i = 0; i < len; ++i){
 		SMJS_Plugin *pl = GetPlugin(i);
@@ -65,10 +67,29 @@ DETOUR_DECL_MEMBER3(ParseUnit, void*, void*, a2, void*, a3, void*, a4){
 
 		if(hooks->size() == 0) continue;
 
-		for(auto it = hooks->begin(); it != hooks->end(); ++it){
-			auto func = *it;
-			func->Call(pl->GetContext()->Global(), 1, &(entWrapper->GetWrapper(pl)));
+		// The new way those functions are called makes it so it's too inefficient to support
+		// old plugins
+		if(pl->GetApiVersion() >= 4){
+			if(kv == NULL){
+				kv = new SMJS_VKeyValues((KeyValues2*) keyvalues);
+			}
+
+			v8::Handle<v8::Value> args[2];
+			args[0] = entWrapper->GetWrapper(pl);
+			args[1] = kv->GetWrapper(pl);
+			for(auto it = hooks->begin(); it != hooks->end(); ++it){
+				auto func = *it;
+				func->Call(pl->GetContext()->Global(), 2, args);
+			}
 		}
+	}
+
+	void *ret = DETOUR_MEMBER_CALL(ParseUnit)(a2, kv != NULL ? kv->kv : keyvalues, a4);
+	
+	if(kv != NULL){
+		kv->Restore();
+		kv->kv = NULL;
+		kv->Destroy();
 	}
 
 	return ret;

@@ -15,7 +15,7 @@ __pragma(warning(default:4005) )
 
 //#include "sp_file_headers.h"
 
-#define SMJS_API_VERSION 3
+#define SMJS_API_VERSION 4
 
 typedef int PLUGIN_ID;
 
