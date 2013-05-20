@@ -20,12 +20,12 @@
 			/*
 				CBaseEntity* __usercall CreateUnit<eax>(const char *clsname<eax>, int player, signed int team, char bNoMouse, signed int alwaysZero)
 				
-				Function called inside the "dota_create_unit" concmd dispatch
+				Function called inside the "dota_create_neutral_hero" concmd dispatch
 			*/
 			"CreateUnit"
 			{
 				"library"	"server"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x53\x56\x57\x8B\xF8\x33\xC0\x38*****\xC6\x45\xFF\x00\x0F\x95\xC0\x8B******\x85\xC0"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x1C\x53\x56\x57\x8B\xF8\x33\xC0\x38*****\xC6\x45\xFF\x00\x0F\x95\xC0\x8B"
 			}
 			
 			/*

@@ -1,7 +1,41 @@
 #include "SMJS_Client.h"
 #include "SMJS_Plugin.h"
+#include "game/shared/protobuf/usermessages.pb.h"
 
 WRAPPED_CLS_CPP(SMJS_Client, SMJS_Entity)
+
+class SingleRecipientFilter : public IRecipientFilter
+{
+public:
+	SingleRecipientFilter(int idx)
+	{
+		index = idx;
+	}
+
+	virtual bool IsReliable( void ) const __override
+	{
+		return true;
+	}
+
+	virtual bool IsInitMessage( void ) const __override
+	{
+		return false;
+	}
+
+	virtual int GetRecipientCount( void ) const __override
+	{
+		return 1;
+	}
+
+	virtual const int* GetRecipientIndex( int *clientIndex, int slot ) const __override
+	{
+		*clientIndex = reinterpret_cast<int>(gamehelpers->EdictOfIndex(index));
+		return &index;
+	}
+
+private:
+	int index;
+};
 
 SMJS_Client::SMJS_Client(edict_t *edict) : SMJS_Entity(NULL) {
 	this->edict = edict;
@@ -22,13 +56,29 @@ void SMJS_Client::ReattachEntity(){
 	}
 }
 
+
+
+void SendMessage(int clientIndex, int dest, const char *str){
+	SingleRecipientFilter filter(clientIndex);
+
+	CUserMsg_TextMsg textmsg;
+	textmsg.set_dest(dest);
+	textmsg.add_param(str);
+	textmsg.add_param("");
+	textmsg.add_param("");
+	textmsg.add_param("");
+	textmsg.add_param("");
+
+	engine->SendUserMessage(filter, UM_TextMsg, textmsg);
+}
+
 FUNCTION_M(SMJS_Client::printToChat)
 	GET_INTERNAL(SMJS_Client*, self);
 	if(!self->valid) THROW("Invalid entity");
 	
 	PSTR(str);
 	
-	gamehelpers->TextMsg(self->entIndex, TEXTMSG_DEST_CHAT, *str);
+	SendMessage(self->entIndex, TEXTMSG_DEST_CHAT, *str);
 	RETURN_UNDEF;
 END
 
@@ -37,7 +87,7 @@ FUNCTION_M(SMJS_Client::printToConsole)
 	if(!self->valid) THROW("Invalid entity");
 	PSTR(str);
 
-	gamehelpers->TextMsg(self->entIndex, TEXTMSG_DEST_CONSOLE, *str);
+	SendMessage(self->entIndex, TEXTMSG_DEST_CONSOLE, *str);
 	RETURN_UNDEF;
 END
 
@@ -76,7 +126,7 @@ END
 FUNCTION_M(SMJS_Client::getAuthString)
 	GET_INTERNAL(SMJS_Client*, self);
 	if(self->edict == NULL) THROW("Invalid edict");
-	RETURN_SCOPED(v8::String::New(engine->GetPlayerNetworkIDString(self->entIndex)));
+	RETURN_SCOPED(v8::String::New(engine->GetPlayerNetworkIDString(self->entIndex - 1)));
 END
 
 FUNCTION_M(SMJS_Client::kick)

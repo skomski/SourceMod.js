@@ -483,8 +483,6 @@ FUNCTION_M(MDota::forceWin)
 END
 
 FUNCTION_M(MDota::createUnit)
-	RETURN_UNDEF;
-	/*
 	PSTR(tmp);
 	PINT(team);
 	CBaseEntity *ent;
@@ -502,5 +500,5 @@ FUNCTION_M(MDota::createUnit)
 	
 	if(ent == NULL) return v8::Null();
 
-	RETURN_SCOPED(GetEntityWrapper(ent)->GetWrapper(GetPluginRunning()));*/
+	RETURN_SCOPED(GetEntityWrapper(ent)->GetWrapper(GetPluginRunning()));
 END

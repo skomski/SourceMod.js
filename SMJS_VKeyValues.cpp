@@ -11,17 +11,20 @@ SMJS_VKeyValues::~SMJS_VKeyValues(){
 
 void SMJS_VKeyValues::Restore(){
 	for(auto it = restoreValues.begin(); it != restoreValues.end(); ++it){
-		switch(it->second->m_iDataType){
-			case KeyValues::TYPE_STRING:
-				kv->SetString2(it->first.c_str(), it->second->asString);
-			break;
-			case KeyValues::TYPE_INT:
-				kv->SetInt(it->first.c_str(), it->second->asInt);
-			break;
-			case KeyValues::TYPE_FLOAT:
-				kv->SetInt(it->first.c_str(), it->second->asFloat);
-			break;
-
+		if(it->second == NULL){
+			kv->RemoveSubKey(kv->FindKey(it->first.c_str(), false));
+		}else{
+			switch(it->second->m_iDataType){
+				case KeyValues::TYPE_STRING:
+					kv->SetString2(it->first.c_str(), it->second->asString);
+				break;
+				case KeyValues::TYPE_INT:
+					kv->SetInt(it->first.c_str(), it->second->asInt);
+				break;
+				case KeyValues::TYPE_FLOAT:
+					kv->SetInt(it->first.c_str(), it->second->asFloat);
+				break;
+			}
 		}
 	}
 }
@@ -86,6 +89,17 @@ v8::Handle<v8::Value> SMJS_VKeyValues::SetKeyValue(v8::Local<v8::String> prop, v
 					}
 
 				self->kv->SetFloat(*str, value->NumberValue());
+			}
+		break;
+
+		case KeyValues::TYPE_NONE:
+			{
+				auto it = self->restoreValues.find(propStdName);
+				if(it == self->restoreValues.end()){
+					self->restoreValues.insert(std::make_pair(propStdName, (VKeyValuesRestore*) NULL));
+				}
+				v8::String::Utf8Value vstr(value);
+				self->kv->SetString2(*str, *vstr);
 			}
 		break;
 		default: THROW_VERB("Unknown data type %d", self->kv->GetDataType(*str));

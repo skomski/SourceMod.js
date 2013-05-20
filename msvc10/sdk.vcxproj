@@ -468,12 +468,12 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\boost_1_53_0\;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release with Symbols|Win32'">C:\boost_1_53_0\;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\hl2sdk-dota\lib\public\;..\v8\v8\build\Release\lib;..\lib;$(LibraryPath)</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release with Symbols|Win32'">..\..\..\hl2sdk-dota\lib\public\;..\v8\v8\build\Release\lib;..\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release with Symbols|Win32'">..\..\..\hl2sdk-dota\lib\public\;..\v8\v8\build\Release\lib;..\lib;..\..\..\hl2sdk-dota\lib\win32\release\vs2010;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\sdk;..\;..\..\..\sourcemod-central;..\..\..\sourcemod-central\public;..\..\..\sourcemod-central\public\sourcepawn;..\..\..\mmsource-1.9\core;..\..\..\mmsource-1.9\core\sourcehook;..\..\..\mmsource-1.9\public;..\..\..\hl2sdk-dota\;..\..\..\hl2sdk-dota\public;..\..\..\hl2sdk-dota\public\tier0;..\..\..\hl2sdk-dota\public\tier1;..\..\..\hl2sdk-dota\public\engine;..\..\..\hl2sdk-dota\public\vstdlib;..\..\..\hl2sdk-dota\public\game\server;..\v8\v8\include;..\..\..\sourcemod-central\core;..\..\..\sourcemod-central\core\logic;..\..\..\sourcemod-central\public\extensions;..\clsocket;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\sdk;..\;..\..\..\sourcemod-central;..\..\..\sourcemod-central\public;..\..\..\sourcemod-central\public\sourcepawn;..\..\..\mmsource-1.9\core;..\..\..\mmsource-1.9\core\sourcehook;..\..\..\mmsource-1.9\public;..\..\..\hl2sdk-dota\;..\..\..\hl2sdk-dota\public;..\..\..\hl2sdk-dota\public\tier0;..\..\..\hl2sdk-dota\public\tier1;..\..\..\hl2sdk-dota\public\engine;..\..\..\hl2sdk-dota\public\vstdlib;..\..\..\hl2sdk-dota\public\game\server;..\v8\v8\include;..\..\..\sourcemod-central\core;..\..\..\sourcemod-central\core\logic;..\..\..\sourcemod-central\public\extensions;..\clsocket;..\..\..\hl2sdk-dota\common\protobuf-2.4.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;SOURCEMOD_BUILD;COMPILER_MSVC;COMPILER_MSVC32;V8_ENABLE_CHECKS;_WIN32_WINNT=0x0501;SOURCE_ENGINE=14;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -493,13 +493,13 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Ws2_32.lib;WINMM.LIB;interfaces.lib;tier0.lib;tier1.debug.lib;vstdlib.lib;v8_base.ia32.lib;v8_snapshot.lib;clsocket.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;WINMM.LIB;interfaces.lib;tier0.lib;tier1.debug.lib;vstdlib.lib;v8_base.ia32.lib;v8_snapshot.lib;clsocket.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..\sdk;..\;..\..\..\sourcemod-central;..\..\..\sourcemod-central\public;..\..\..\sourcemod-central\public\sourcepawn;..\..\..\mmsource-1.9\core;..\..\..\mmsource-1.9\core\sourcehook;..\..\..\mmsource-1.9\public;..\..\..\hl2sdk-dota\;..\..\..\hl2sdk-dota\public;..\..\..\hl2sdk-dota\public\tier0;..\..\..\hl2sdk-dota\public\tier1;..\..\..\hl2sdk-dota\public\engine;..\..\..\hl2sdk-dota\public\vstdlib;..\..\..\hl2sdk-dota\public\game\server;..\v8\v8\include;..\..\..\sourcemod-central\core;..\..\..\sourcemod-central\core\logic;..\..\..\sourcemod-central\public\extensions;..\clsocket;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\sdk;..\;..\..\..\sourcemod-central;..\..\..\sourcemod-central\public;..\..\..\sourcemod-central\public\sourcepawn;..\..\..\mmsource-1.9\core;..\..\..\mmsource-1.9\core\sourcehook;..\..\..\mmsource-1.9\public;..\..\..\hl2sdk-dota\;..\..\..\hl2sdk-dota\public;..\..\..\hl2sdk-dota\public\tier0;..\..\..\hl2sdk-dota\public\tier1;..\..\..\hl2sdk-dota\public\engine;..\..\..\hl2sdk-dota\public\vstdlib;..\..\..\hl2sdk-dota\public\game\server;..\v8\v8\include;..\..\..\sourcemod-central\core;..\..\..\sourcemod-central\core\logic;..\..\..\sourcemod-central\public\extensions;..\clsocket;..\..\..\hl2sdk-dota\common\protobuf-2.4.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;SOURCEMOD_BUILD;COMPILER_MSVC;COMPILER_MSVC32;SOURCE_ENGINE=14;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
@@ -523,13 +523,13 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Ws2_32.lib;WINMM.LIB;interfaces.lib;tier0.lib;tier1.lib;vstdlib.lib;v8_base.ia32.lib;v8_snapshot.lib;clsocket.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;WINMM.LIB;interfaces.lib;tier0.lib;tier1.lib;vstdlib.lib;v8_base.ia32.lib;v8_snapshot.lib;clsocket.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with Symbols|Win32'">
     <ClCompile>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..\sdk;..\;..\..\..\sourcemod-central;..\..\..\sourcemod-central\public;..\..\..\sourcemod-central\public\sourcepawn;..\..\..\mmsource-1.9\core;..\..\..\mmsource-1.9\core\sourcehook;..\..\..\mmsource-1.9\public;..\..\..\hl2sdk-dota\;..\..\..\hl2sdk-dota\public;..\..\..\hl2sdk-dota\public\tier0;..\..\..\hl2sdk-dota\public\tier1;..\..\..\hl2sdk-dota\public\engine;..\..\..\hl2sdk-dota\public\vstdlib;..\..\..\hl2sdk-dota\public\game\server;..\v8\v8\include;..\..\..\sourcemod-central\core;..\..\..\sourcemod-central\core\logic;..\..\..\sourcemod-central\public\extensions;..\clsocket;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\sdk;..\;..\..\..\sourcemod-central;..\..\..\sourcemod-central\public;..\..\..\sourcemod-central\public\sourcepawn;..\..\..\mmsource-1.9\core;..\..\..\mmsource-1.9\core\sourcehook;..\..\..\mmsource-1.9\public;..\..\..\hl2sdk-dota\;..\..\..\hl2sdk-dota\public;..\..\..\hl2sdk-dota\public\tier0;..\..\..\hl2sdk-dota\public\tier1;..\..\..\hl2sdk-dota\public\engine;..\..\..\hl2sdk-dota\public\vstdlib;..\..\..\hl2sdk-dota\public\game\server;..\v8\v8\include;..\..\..\sourcemod-central\core;..\..\..\sourcemod-central\core\logic;..\..\..\sourcemod-central\public\extensions;..\clsocket;..\..\..\hl2sdk-dota\common\protobuf-2.4.1\src;..\..\..\hl2sdk-dota\public\engine\protobuf;..\..\..\hl2sdk-dota\public\game\shared\protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SDK_EXPORTS;_CRT_SECURE_NO_DEPRECATE;SOURCEMOD_BUILD;COMPILER_MSVC;COMPILER_MSVC32;SOURCE_ENGINE=14;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
@@ -553,7 +553,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Ws2_32.lib;WINMM.LIB;interfaces.lib;tier0.lib;tier1.lib;vstdlib.lib;v8_base.ia32.lib;v8_snapshot.lib;clsocket.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;WINMM.LIB;interfaces.lib;tier0.lib;tier1.lib;vstdlib.lib;v8_base.ia32.lib;v8_snapshot.lib;clsocket.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/Profile %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -1206,6 +1206,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\engine\protobuf\netmessages.pb.cc" />
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessages.pb.cc" />
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessage_helpers.cpp" />
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_commonmessages.pb.cc" />
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessages.pb.cc" />
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessage_helpers.cpp" />
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\protobuf\ai_activity.pb.cc" />
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\protobuf\usermessages.pb.cc" />
     <ClCompile Include="..\asm\asm.c" />
     <ClCompile Include="..\CDetour\detours.cpp" />
     <ClCompile Include="..\extension.cpp" />
@@ -1238,6 +1246,14 @@
     <ClCompile Include="..\SMJS_VKeyValues.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\engine\protobuf\netmessages.pb.h" />
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessages.pb.h" />
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessage_helpers.h" />
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_commonmessages.pb.h" />
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessages.pb.h" />
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessage_helpers.h" />
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\protobuf\ai_activity.pb.h" />
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\protobuf\usermessages.pb.h" />
     <ClInclude Include="..\asm\asm.h" />
     <ClInclude Include="..\CDetour\detourhelpers.h" />
     <ClInclude Include="..\CDetour\detours.h" />
@@ -1253,10 +1269,6 @@
     <ClInclude Include="..\modules\MKeyValue.h" />
     <ClInclude Include="..\modules\MPlugin.h" />
     <ClInclude Include="..\modules\MSocket.h" />
-    <ClInclude Include="..\public\ISMJS.h" />
-    <ClInclude Include="..\public\ISMJS_config.h" />
-    <ClInclude Include="..\public\SMJS_BaseWrapped.h" />
-    <ClInclude Include="..\public\SMJS_Plugin.h" />
     <ClInclude Include="..\SMJS.h" />
     <ClInclude Include="..\SMJS_Base.h" />
     <ClInclude Include="..\SMJS_BaseWrapped.h" />

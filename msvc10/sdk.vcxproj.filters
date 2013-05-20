@@ -15,14 +15,14 @@
     <Filter Include="Modules">
       <UniqueIdentifier>{3f6d7368-d23f-4b17-8369-1a5de71e45ce}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Public">
-      <UniqueIdentifier>{ca7e35a3-828c-4f7e-b10d-5bac38855aa2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CDetour">
       <UniqueIdentifier>{394f7baa-6fe4-444c-9fe0-63d5e8bedf6f}</UniqueIdentifier>
     </Filter>
     <Filter Include="clsocket">
       <UniqueIdentifier>{ae1ad348-37f4-4c4f-9ee5-506ed6fb84a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dota">
+      <UniqueIdentifier>{8f45bc9e-d713-41e6-8672-3a98326a50f1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +116,30 @@
     <ClCompile Include="..\SMJS_VKeyValues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\protobuf\usermessages.pb.cc">
+      <Filter>Dota</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessages.pb.cc">
+      <Filter>Dota</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessage_helpers.cpp">
+      <Filter>Dota</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessages.pb.cc">
+      <Filter>Dota</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_commonmessages.pb.cc">
+      <Filter>Dota</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessage_helpers.cpp">
+      <Filter>Dota</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\protobuf\ai_activity.pb.cc">
+      <Filter>Dota</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\engine\protobuf\netmessages.pb.cc">
+      <Filter>Dota</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extension.h">
@@ -174,18 +198,6 @@
     </ClInclude>
     <ClInclude Include="..\modules\MSocket.h">
       <Filter>Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\ISMJS.h">
-      <Filter>Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\SMJS_BaseWrapped.h">
-      <Filter>Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\SMJS_Plugin.h">
-      <Filter>Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\ISMJS_config.h">
-      <Filter>Public</Filter>
     </ClInclude>
     <ClInclude Include="..\modules\MDota.h">
       <Filter>Modules</Filter>
@@ -249,6 +261,30 @@
     </ClInclude>
     <ClInclude Include="..\SMJS_VKeyValues.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\protobuf\usermessages.pb.h">
+      <Filter>Dota</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessage_helpers.h">
+      <Filter>Dota</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessages.pb.h">
+      <Filter>Dota</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessage_helpers.h">
+      <Filter>Dota</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessages.pb.h">
+      <Filter>Dota</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_commonmessages.pb.h">
+      <Filter>Dota</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\protobuf\ai_activity.pb.h">
+      <Filter>Dota</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\engine\protobuf\netmessages.pb.h">
+      <Filter>Dota</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
