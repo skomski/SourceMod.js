@@ -68,6 +68,7 @@ void SMJS_Plugin::LoadModules(){
 		context->Global()->Set(v8::String::New(module->identifier.c_str()), module->GetWrapper(this), ReadOnly);
 	}
 	
+	v8::Script::New(v8::String::New(scriptDotaStr), &v8::ScriptOrigin(v8::String::New("dota.js")), scriptDotaData)->Run();
 }
 
 SMJS_Plugin::~SMJS_Plugin(){

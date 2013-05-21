@@ -108,6 +108,7 @@ FUNCTION_M(SMJS_Entity::input)
 		pass[1].type = pass[2].type = PassType_Basic;
 		pass[1].flags = pass[2].flags = PASSFLAG_BYVAL;
 		pass[1].size = pass[2].size = sizeof(CBaseEntity *);
+
 		pass[3].type = PassType_Object;
 		pass[3].flags = PASSFLAG_BYVAL|PASSFLAG_OCTOR|PASSFLAG_ODTOR|PASSFLAG_OASSIGNOP;
 		pass[3].size = SIZEOF_VARIANT_T;
@@ -128,6 +129,7 @@ FUNCTION_M(SMJS_Entity::input)
 	CBaseEntity *pActivator, *pCaller, *pDest;
 	
 	GET_INTERNAL(SMJS_Entity*, self);
+	if(!self->valid) THROW("Invalid entity");
 
 	char *inputname;
 	unsigned char vstk[sizeof(void *) + sizeof(const char *) + sizeof(CBaseEntity *)*2 + SIZEOF_VARIANT_T + sizeof(int)];
@@ -220,6 +222,7 @@ END
 FUNCTION_M(SMJS_Entity::removeEdict)
 	GET_INTERNAL(SMJS_Entity*, self);
 
+	if(!self->valid) THROW("Invalid entity");
 	if(self->edict == NULL) THROW("Entity does not have an edict");
 
 	engine->RemoveEdict(self->edict);
@@ -229,6 +232,7 @@ END
 
 FUNCTION_M(SMJS_Entity::setData)
 	GET_INTERNAL(SMJS_Entity*, self);
+	if(!self->valid) THROW("Invalid entity");
 
 	PINT(offset);
 	PINT(size);
@@ -257,6 +261,7 @@ END
 
 FUNCTION_M(SMJS_Entity::getData)
 	GET_INTERNAL(SMJS_Entity*, self);
+	if(!self->valid) THROW("Invalid entity");
 
 	PINT(offset);
 	PINT(size);
@@ -278,6 +283,98 @@ FUNCTION_M(SMJS_Entity::getData)
 
 	default: THROW_VERB("Invalid size %d", size);
 	}
+
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(SMJS_Entity::setDataEnt)
+	GET_INTERNAL(SMJS_Entity*, self);
+	if(!self->valid) THROW("Invalid entity");
+	SMJS_Entity* other = NULL;
+
+	PINT(offset);
+	POBJ_NULLABLE(otherTmp);
+
+	if(!otherTmp->IsNull()){
+		auto inte = otherTmp->GetInternalField(0);
+		if(inte.IsEmpty()){
+			THROW("Invalid other entity");
+		}
+
+		other = dynamic_cast<SMJS_Entity*>((SMJS_Base*) v8::Handle<v8::External>::Cast(inte)->Value());
+		if(other == NULL) THROW("Invalid other entity");
+	}
+
+
+	void *addr = (void*) ((intptr_t) self->ent + offset);
+	CBaseHandle &hndl = *(CBaseHandle *)addr;
+
+	if(other == NULL){
+		hndl.Set(NULL);
+	}else{
+		if(!other->valid) THROW("Invalid other entity");
+		IHandleEntity *pHandleEnt = (IHandleEntity *)other->ent;
+		hndl.Set(pHandleEnt);
+	}
+
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(SMJS_Entity::teleport)
+	GET_INTERNAL(SMJS_Entity*, self);
+	if(!self->valid) THROW("Invalid entity");
+
+	static ICallWrapper *g_pTeleport = NULL;
+	if (!g_pTeleport){
+		int offset;
+		if (!sdkToolsConf->GetOffset("Teleport", &offset)){
+			THROW("\"Teleport\" not supported by this mod");
+		}
+
+		// Temporary fix until the sourcemod offset is updated
+		offset = 116;
+	
+		PassInfo pass[3];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(void *);
+		
+		pass[1].type = PassType_Basic;
+		pass[1].flags = PASSFLAG_BYVAL;
+		pass[1].size = sizeof(void *);
+		
+		pass[2].type = PassType_Basic;
+		pass[2].flags = PASSFLAG_BYVAL;
+		pass[2].size = sizeof(void *);
+		
+		if (!(g_pTeleport = binTools->CreateVCall(offset, 0, 0, NULL, pass, 3))){
+			THROW("\"Teleport\" wrapper failed to initialized");
+		}
+	}
+	
+	PNUM(x);
+	PNUM(y);
+	PNUM(z);
+
+	unsigned char vstk[sizeof(void *) * 4];
+	unsigned char *vptr = vstk;
+
+	Vector vec(x, y, z);
+	
+	*(void **)vptr = self->ent;
+	vptr += sizeof(void *);
+
+	*(void **)vptr = &vec;
+	vptr += sizeof(void *);
+
+	*(void **)vptr = NULL;
+	vptr += sizeof(void *);
+
+	*(void **)vptr = NULL;
+	vptr += sizeof(void *);
+
+	void *ret;
+	g_pTeleport->Execute(vstk, &ret);
 
 	RETURN_UNDEF;
 END

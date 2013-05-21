@@ -388,6 +388,15 @@ FUNCTION_M(MGame::hookEvent)
 	RETURN_SCOPED(v8::Boolean::New(true));
 END
 
+FUNCTION_M(MGame::createEntity)
+	PSTR(name);
+	//TODO check if the map is running
+	
+	CBaseEntity *pEntity = (CBaseEntity *) serverTools->CreateEntityByName(*name);
+	if(pEntity == NULL) RETURN_SCOPED(v8::Null());
+	RETURN_SCOPED(GetEntityWrapper(pEntity)->GetWrapper(GetPluginRunning()));
+END
+
 void pauseGame(){
 	SMJS_Pause();
 	v8::V8::RemoveCallCompletedCallback(pauseGame);

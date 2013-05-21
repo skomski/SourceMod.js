@@ -34,6 +34,8 @@ public:
 	FUNCTION_DECL(removeEdict);
 	FUNCTION_DECL(setData);
 	FUNCTION_DECL(getData);
+	FUNCTION_DECL(setDataEnt);
+	FUNCTION_DECL(teleport);
 
 	WRAPPED_CLS(SMJS_Entity, SMJS_BaseWrapped) {
 		temp->SetClassName(v8::String::NewSymbol("Entity"));
@@ -49,6 +51,8 @@ public:
 		WRAPPED_FUNC(removeEdict);
 		WRAPPED_FUNC(setData);
 		WRAPPED_FUNC(getData);
+		WRAPPED_FUNC(setDataEnt);
+		WRAPPED_FUNC(teleport);
 	}
 
 private:

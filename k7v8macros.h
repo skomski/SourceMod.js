@@ -101,13 +101,18 @@ using namespace v8;
 	THROW_VERB("Argument %i of %s, must be an object\n",_argn,FUN_NAME);} \
 	v8::Handle<v8::Object> n (args[_argn-1]->ToObject()); 0
 
+#define POBJ_NULLABLE(n)             0; if (args.Length()<++_argn || (!args[_argn-1]->IsObject() && !args[_argn-1]->IsNull())) {\
+	THROW_VERB("Argument %i of %s, must be an object\n",_argn,FUN_NAME);} \
+	v8::Handle<v8::Object> n (args[_argn-1]->ToObject()); 0
+
 #define PFUN(n)             0; if (args.Length()<++_argn || !args[_argn-1]->IsFunction()) {\
 	THROW_VERB("Argument %i of %s, must be a function\n",_argn,FUN_NAME);} \
 	v8::Handle<v8::Function> n (v8::Function::Cast(*args[_argn-1])); 0
 
-#define PWRAP(type,var)   0; if (args.Length()<++_argn || !args[_argn-1]->IsExternal()) {\
+#define PWRAP(type,var,notNull)   0; if (args.Length()<++_argn || (!args[_argn-1]->IsExternal() && !args[_argn-1]->IsNull())) {\
 	THROW_VERB("Argument %i of %s, must be an external\n",_argn,FUN_NAME);} \
-	type* var = (type*) v8::External::Cast(*args[_argn-1])->Value(); 0
+	type var = dynamic_cast<type>((SMJS_Base*)v8::External::Cast(*args[_argn-1])->Value()); \
+	if(notNull && var == NULL) THROW_VERB("Argument %i is of an invalid type\n",_argn,FUN_NAME);
 
 // ----------------------------------------------------------------------------
 //

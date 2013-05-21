@@ -487,12 +487,17 @@ FUNCTION_M(MDota::createUnit)
 	PINT(team);
 	CBaseEntity *ent;
 	char *clsname = *tmp;
+	CBaseEntity *targetEntity;
+
+	// It can also use a CDOTAPlayer, and it'll spawn the entity in the middle of its screen
+	targetEntity = gamehelpers->EdictOfIndex(0)->GetNetworkable()->GetBaseEntity();
+
 	__asm {
 		mov		eax, clsname
 		push	0
 		push	1
 		push	team
-		push	0		// Client
+		push	targetEntity
 		call	CreateUnit
 		mov		ent, eax
 		add		esp, 10h

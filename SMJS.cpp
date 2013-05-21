@@ -9,6 +9,10 @@ time_t lastPing;
 bool isPaused = false;
 SourceMod::IMutex *pingMutex;
 
+//TODO: Read this from sourcemod.js/dota.js
+const char *scriptDotaStr = "dota.setUnitWaypoint = function(unit, waypoint){unit.setDataEnt(10036, waypoint);};";
+v8::ScriptData *scriptDotaData;
+
 void SMJS_OnPausedTick();
 
 class SMJS_CheckerThread : public SourceMod::IThread{
@@ -95,9 +99,12 @@ void OnMessage(Handle<Message> message, Handle<Value> error){
 
 void SMJS_Init(){
 	mainIsolate = v8::Isolate::GetCurrent();
+	HandleScope handle_scope(mainIsolate);
 
 	char smjsPath[512];
 	smutils->BuildPath(Path_SM, smjsPath, sizeof(smjsPath), "sourcemod.js");
+
+	scriptDotaData = v8::ScriptData::PreCompile(v8::String::New(scriptDotaStr));
 
 	v8::V8::AddMessageListener(OnMessage);
 

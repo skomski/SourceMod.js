@@ -36,5 +36,8 @@ void SMJS_Resume();
 
 extern v8::Isolate *mainIsolate;
 
+extern const char *scriptDotaStr;
+extern v8::ScriptData *scriptDotaData;
+
 
 #endif
