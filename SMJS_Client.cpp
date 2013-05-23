@@ -57,6 +57,11 @@ void SMJS_Client::ReattachEntity(){
 }
 
 
+FUNCTION_M(SMJS_Client::getName)
+	GET_INTERNAL(SMJS_Client*, self);
+	if(self->edict == NULL) THROW("Invalid edict");
+	RETURN_SCOPED(v8::String::New(playerhelpers->GetGamePlayer(self->edict)->GetName()));
+END
 
 void SendMessage(int clientIndex, int dest, const char *str){
 	SingleRecipientFilter filter(clientIndex);

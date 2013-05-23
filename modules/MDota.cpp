@@ -485,12 +485,25 @@ END
 FUNCTION_M(MDota::createUnit)
 	PSTR(tmp);
 	PINT(team);
+	
 	CBaseEntity *ent;
-	char *clsname = *tmp;
 	CBaseEntity *targetEntity;
+	char *clsname = *tmp;
+	
 
-	// It can also use a CDOTAPlayer, and it'll spawn the entity in the middle of its screen
-	targetEntity = gamehelpers->EdictOfIndex(0)->GetNetworkable()->GetBaseEntity();
+	if(args.Length() > 2){
+		POBJ(otherTmp);
+		auto inte = otherTmp->GetInternalField(0);
+		if(inte.IsEmpty()){
+			THROW("Invalid other entity");
+		}
+
+		auto other = dynamic_cast<SMJS_Entity*>((SMJS_Base*) v8::Handle<v8::External>::Cast(inte)->Value());
+		if(other == NULL) THROW("Invalid other entity");
+		targetEntity = other->ent;
+	}else{
+		targetEntity = gamehelpers->EdictOfIndex(0)->GetNetworkable()->GetBaseEntity();
+	}
 
 	__asm {
 		mov		eax, clsname

@@ -43,7 +43,7 @@ void MConsole::OnPluginDestroyed(SMJS_Plugin *plugin){
 		for(auto it2 = hooks.begin(); it2 != hooks.end() && hooks.size() != 0; ++it2){
 			if((*it2)->pl == plugin){
 				auto p = *it2;
-				//it2 = hooks.erase(it2);
+				hooks.erase(it2);
 				it2 = hooks.begin();
 				delete p;
 			}

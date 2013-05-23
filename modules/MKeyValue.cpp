@@ -138,10 +138,11 @@ v8::Handle<v8::Value> ParseKeyValue(const char *str){
 				if ((chr < '0' || chr > '9') && chr != '.' && chr != 'x') break;
 			}
 
-			char tmp = str[i];
-			const_cast<char*>(str)[i] = '\0';
-			auto number = v8::Number::New(atof(&str[i]));
-			const_cast<char*>(str)[i] = tmp;
+			char *tmp = new char[i - startIndex + 1];
+			memcpy(tmp, &str[startIndex], i - startIndex);
+			tmp[i - startIndex] = '\0';
+			auto number = v8::Number::New(atof(tmp));
+			delete tmp;
 
 			//TODO: If the number is an invalid number, throw an error
 
