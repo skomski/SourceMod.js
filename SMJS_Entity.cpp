@@ -101,6 +101,8 @@ FUNCTION_M(SMJS_Entity::input)
 			THROW("\"AcceptEntityInput\" not supported by this mod");
 		}
 	
+		offset = 43; // Temporary workaround
+
 		PassInfo pass[6];
 		pass[0].type = PassType_Basic;
 		pass[0].flags = PASSFLAG_BYVAL;

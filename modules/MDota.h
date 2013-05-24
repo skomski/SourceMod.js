@@ -126,6 +126,7 @@ public:
 	FUNCTION_DECL(loadParticleFile);
 	FUNCTION_DECL(forceWin);
 	FUNCTION_DECL(createUnit);
+	FUNCTION_DECL(findClearSpaceForUnit);
 	
 
 	WRAPPED_CLS(MDota, SMJS_Module) {
@@ -135,6 +136,7 @@ public:
 		WRAPPED_FUNC(loadParticleFile);
 		WRAPPED_FUNC(forceWin);
 		WRAPPED_FUNC(createUnit);
+		WRAPPED_FUNC(findClearSpaceForUnit);
 
 		proto->Set(v8::String::New("MAX_PLAYERS"), v8::Int32::New(24), v8::ReadOnly);
 

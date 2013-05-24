@@ -18,6 +18,8 @@ CDetour *parseUnitDetour;
 CDetour *getAbilityValueDetour;
 CDetour *clientPickHeroDetour;
 
+void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
+
 enum FieldType {
 	FT_Void = 0,
 	FT_Float = 1,
@@ -333,6 +335,11 @@ MDota::MDota(){
 	if(!dotaConf->GetMemSig("CreateUnit", &CreateUnit) || CreateUnit == NULL){
 		smutils->LogError(myself, "Couldn't sigscan CreateUnit");
 	}
+
+	if(!dotaConf->GetMemSig("FindClearSpaceForUnit", (void**) &FindClearSpaceForUnit) || FindClearSpaceForUnit == NULL){
+		smutils->LogError(myself, "Couldn't sigscan FindClearSpaceForUnit");
+	}
+	
 }
 
 void MDota::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
@@ -519,4 +526,24 @@ FUNCTION_M(MDota::createUnit)
 	if(ent == NULL) return v8::Null();
 
 	RETURN_SCOPED(GetEntityWrapper(ent)->GetWrapper(GetPluginRunning()));
+END
+
+FUNCTION_M(MDota::findClearSpaceForUnit)
+	POBJ(otherTmp);
+	PNUM(x);
+	PNUM(y);
+	PNUM(z);
+
+	CBaseEntity *targetEntity;
+	auto inte = otherTmp->GetInternalField(0);
+	if(inte.IsEmpty()){
+		THROW("Invalid other entity");
+	}
+
+	auto other = dynamic_cast<SMJS_Entity*>((SMJS_Base*) v8::Handle<v8::External>::Cast(inte)->Value());
+	if(other == NULL) THROW("Invalid other entity");
+	targetEntity = other->ent;
+
+	FindClearSpaceForUnit(targetEntity, Vector(x, y, z), true);
+	RETURN_UNDEF;
 END
