@@ -138,32 +138,6 @@ public:
 		WRAPPED_FUNC(createUnit);
 		WRAPPED_FUNC(findClearSpaceForUnit);
 
-		proto->Set(v8::String::New("MAX_PLAYERS"), v8::Int32::New(24), v8::ReadOnly);
-
-		proto->Set(v8::String::New("STATE_INIT"), v8::Int32::New(0), v8::ReadOnly);
-		proto->Set(v8::String::New("STATE_WAIT_FOR_PLAYERS_TO_LOAD"), v8::Int32::New(1), v8::ReadOnly);
-		proto->Set(v8::String::New("STATE_HERO_SELECTION"), v8::Int32::New(2), v8::ReadOnly);
-		proto->Set(v8::String::New("STATE_STRATEGY_TIME"), v8::Int32::New(3), v8::ReadOnly);
-		proto->Set(v8::String::New("STATE_PRE_GAME"), v8::Int32::New(4), v8::ReadOnly);
-		proto->Set(v8::String::New("STATE_GAME_IN_PROGRESS"), v8::Int32::New(5), v8::ReadOnly);
-		proto->Set(v8::String::New("STATE_POST_GAME"), v8::Int32::New(6), v8::ReadOnly);
-		proto->Set(v8::String::New("STATE_DISCONNECT"), v8::Int32::New(7), v8::ReadOnly);
-		
-
-		proto->Set(v8::String::New("TEAM_NONE"), v8::Int32::New(0), v8::ReadOnly);
-		proto->Set(v8::String::New("TEAM_SPEC"), v8::Int32::New(1), v8::ReadOnly);
-		proto->Set(v8::String::New("TEAM_RADI"), v8::Int32::New(2), v8::ReadOnly);
-		proto->Set(v8::String::New("TEAM_DIRE"), v8::Int32::New(3), v8::ReadOnly);
-		proto->Set(v8::String::New("TEAM_NEUTRAL"), v8::Int32::New(4), v8::ReadOnly);
-		proto->Set(v8::String::New("TEAM_RADIANT"), v8::Int32::New(2), v8::ReadOnly);
-
-		proto->Set(v8::String::New("DAMAGE_TYPE_PHYSICAL"), v8::Int32::New(1), v8::ReadOnly);
-		proto->Set(v8::String::New("DAMAGE_TYPE_MAGICAL"), v8::Int32::New(2), v8::ReadOnly);
-		proto->Set(v8::String::New("DAMAGE_TYPE_COMPOSITE"), v8::Int32::New(4), v8::ReadOnly);
-		proto->Set(v8::String::New("DAMAGE_TYPE_PURE"), v8::Int32::New(8), v8::ReadOnly);
-		proto->Set(v8::String::New("DAMAGE_TYPE_HP_REMOVAL"), v8::Int32::New(16), v8::ReadOnly);
-
-
 
 #define HERO_ID_CONST(name, value) proto->Set(v8::String::New("HERO_" #name), v8::Int32::New(Hero_##value), v8::ReadOnly);
 		

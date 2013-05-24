@@ -10,41 +10,65 @@ bool isPaused = false;
 SourceMod::IMutex *pingMutex;
 
 //TODO: Read this from sourcemod.js/dota.js
-const char *scriptDotaStr = "dota.setUnitWaypoint = function(unit, waypoint){unit.setDataEnt(10036, waypoint);};";
+const char *scriptDotaStr = NULL;
 v8::ScriptData *scriptDotaData;
 
-void SMJS_OnPausedTick();
+static void SMJS_OnPausedTick();
+static void OnMessage(Handle<Message> message, Handle<Value> error);
+static char* FileToString(const char *file, const char* dir);
 
 class SMJS_CheckerThread : public SourceMod::IThread{
-	void RunThread(IThreadHandle *pHandle){
-		while(1){
-			pingMutex->Lock();
-
-			int now = time(NULL);
-			if(!isPaused && now - lastPing > 30){
-				v8::V8::TerminateExecution(mainIsolate);
-				printf("SERVER STOPPED THINKING, QUITTING\n");
-				threader->ThreadSleep(3000);
-
-				// In production, just let the server die so it can be restarted
-				// Otherwise we'd have to close the dialog that Windows creates before
-				// the server is restarted again
-#ifdef DEBUG
-				abort();
-#else
-				exit(3);
-#endif
-			}
-
-			pingMutex->Unlock();
-			threader->ThreadSleep(1000);
-		}
-	}
-
-	void OnTerminate(IThreadHandle *pHandle, bool cancel){
-
-	}
+	void RunThread(IThreadHandle *pHandle);
+	void OnTerminate(IThreadHandle *pHandle, bool cancel){}
 };
+
+void SMJS_Init(){
+	mainIsolate = v8::Isolate::GetCurrent();
+	HandleScope handle_scope(mainIsolate);
+
+	char smjsPath[512];
+	smutils->BuildPath(Path_SM, smjsPath, sizeof(smjsPath), "sourcemod.js");
+
+	scriptDotaStr = FileToString("dota.js", smjsPath);
+	if(scriptDotaStr == NULL){
+		printf("File \"dota.js\" missing\n");
+		getchar();
+	}
+	scriptDotaData = v8::ScriptData::PreCompile(v8::String::New(scriptDotaStr));
+
+	v8::V8::AddMessageListener(OnMessage);
+
+	
+	pingMutex = threader->MakeMutex();
+	SMJS_Ping();
+	threader->MakeThread(new SMJS_CheckerThread());
+}
+
+void SMJS_CheckerThread::RunThread(IThreadHandle *pHandle){
+	while(1){
+		pingMutex->Lock();
+
+		int now = time(NULL);
+		if(!isPaused && now - lastPing > 30){
+			v8::V8::TerminateExecution(mainIsolate);
+			printf("SERVER STOPPED THINKING, QUITTING\n");
+			threader->ThreadSleep(3000);
+
+			// In production, just let the server die so it can be restarted
+			// Otherwise we'd have to close the dialog that Windows creates before
+			// the server is restarted again
+#ifdef DEBUG
+			abort();
+#else
+			exit(3);
+#endif
+		}
+
+		pingMutex->Unlock();
+		threader->ThreadSleep(1000);
+	}
+}
+
 
 void OnMessage(Handle<Message> message, Handle<Value> error){
 	HandleScope handle_scope(mainIsolate);
@@ -97,23 +121,6 @@ void OnMessage(Handle<Message> message, Handle<Value> error){
 	fprintf(stderr, "--------------------------------------------------------------------------------");
 }
 
-void SMJS_Init(){
-	mainIsolate = v8::Isolate::GetCurrent();
-	HandleScope handle_scope(mainIsolate);
-
-	char smjsPath[512];
-	smutils->BuildPath(Path_SM, smjsPath, sizeof(smjsPath), "sourcemod.js");
-
-	scriptDotaData = v8::ScriptData::PreCompile(v8::String::New(scriptDotaStr));
-
-	v8::V8::AddMessageListener(OnMessage);
-
-	
-	pingMutex = threader->MakeMutex();
-	SMJS_Ping();
-	threader->MakeThread(new SMJS_CheckerThread());
-}
-
 void SMJS_Ping(){
 	pingMutex->Lock();
 	lastPing = time(NULL);
@@ -161,4 +168,41 @@ void SMJS_Resume(){
 
 void SMJS_OnPausedTick(){
 	MSocket::Process();
+}
+
+char* FileToString(const char* file, const char* dir){
+	char path[512];
+	if(dir != NULL){
+#if WIN32
+		snprintf(path, sizeof(path), "%s\\%s", dir, file);
+#else
+		snprintf(path, sizeof(path), "%s/%s", dir, file);
+#endif
+	}else{
+		strcpy(path, file);
+	}
+
+	FILE* fileHandle = fopen(path, "rb");
+	if(fileHandle == NULL) return false;
+
+	fseek(fileHandle, 0, SEEK_END);
+	size_t size = ftell(fileHandle);
+	rewind(fileHandle);
+	
+	char* source = new char[size + 1];
+	size_t i = 0;
+	while(i < size) {
+		i += fread(&source[i], 1, size - i, fileHandle);
+		if(ferror(fileHandle)){
+			printf("Error reading file %s\n", path);
+			perror(NULL);
+			fclose(fileHandle);
+			delete[] source;
+			return false;
+		}
+	}
+	source[size] = '\0';
+	fclose(fileHandle);
+
+	return source;
 }
