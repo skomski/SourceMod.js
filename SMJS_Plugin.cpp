@@ -1,5 +1,6 @@
 #include "extension.h"
 #include "SMJS_Plugin.h"
+#include "modules/MPlugin.h"
 
 std::vector<SMJS_Module*> modules;
 std::vector<SMJS_Plugin*> plugins;
@@ -68,7 +69,7 @@ void SMJS_Plugin::LoadModules(){
 		context->Global()->Set(v8::String::New(module->identifier.c_str()), module->GetWrapper(this), ReadOnly);
 	}
 	
-	v8::Script::New(v8::String::New(scriptDotaStr), &v8::ScriptOrigin(v8::String::New("dota.js")), scriptDotaData)->Run();
+	v8::Script::New(v8::String::New(scriptDotaStr), &v8::ScriptOrigin(v8::String::New("dota.js")), scriptDotaData, v8::String::New(dir.c_str()))->Run();
 }
 
 SMJS_Plugin::~SMJS_Plugin(){
@@ -153,7 +154,7 @@ bool SMJS_Plugin::RunString(const char* name, const char *source, bool asGlobal,
 	v8::ScriptOrigin origin(String::New(name), v8::Integer::New(0), v8::Integer::New(0));
 	Handle<Script> script;
 	if(asGlobal){
-		script = Script::Compile(v8::String::New(source), &origin);
+		script = Script::Compile(v8::String::New(source), &origin, NULL, v8::String::New(dir.c_str()));
 	}else{
 		char *buffer = new char[strlen(source) + 200];
 		strcpy(buffer,
@@ -169,7 +170,7 @@ bool SMJS_Plugin::RunString(const char* name, const char *source, bool asGlobal,
 			return exports;\
 		})();");
 
-		script = Script::Compile(v8::String::New(buffer), &origin);
+		script = Script::Compile(v8::String::New(buffer), &origin, NULL, v8::String::New(dir.c_str()));
 		delete buffer;
 	}
 
@@ -195,41 +196,73 @@ void SMJS_Plugin::ReportException(TryCatch* try_catch){
 
 	fprintf(stderr, "----------------------------- JAVASCRIPT EXCEPTION -----------------------------");
 
-	String::Utf8Value exception(try_catch->Exception());
-	const char* exception_string = ToCString(exception);
 	Handle<Message> message = try_catch->Message();
+	v8::String::Utf8Value tmp(message->Get());
+	const char* exception_string = *tmp;
+	char buffer[2048];
+	buffer[0] = '\0';
+
 	if (message.IsEmpty()) {
 		// V8 didn't provide any extra information about this error; just
 		// print the exception.
-		fprintf(stderr, "%s\n", exception_string);
+		
+		snprintf(buffer, sizeof(buffer), "%s%s\n", buffer, exception_string);
 	} else {
 		// Print (filename):(line number): (message).
 		String::Utf8Value filename(message->GetScriptResourceName());
-		const char* filename_string = ToCString(filename);
+		const char* filename_string = *filename;
 		int linenum = message->GetLineNumber();
-		fprintf(stderr, "%s:%d: %s\n", filename_string, linenum, exception_string);
+		snprintf(buffer, sizeof(buffer), "%s%s:%d: %s\n", buffer, filename_string, linenum, exception_string);
 		// Print line of source code.
 		String::Utf8Value sourceline(message->GetSourceLine());
-		const char* sourceline_string = ToCString(sourceline);
-		fprintf(stderr, "%s\n", sourceline_string);
+		const char* sourceline_string = *sourceline;
+		snprintf(buffer, sizeof(buffer), "%s%s\n", buffer, sourceline_string);
 		// Print wavy underline (GetUnderline is deprecated).
 		int start = message->GetStartColumn();
 		for (int i = 0; i < start; i++) {
-			fprintf(stderr, " ");
+			snprintf(buffer, sizeof(buffer), "%s%c", buffer, ' ');
 		}
 		int end = message->GetEndColumn();
 		for (int i = start; i < end; i++) {
-			fprintf(stderr, "^");
+			snprintf(buffer, sizeof(buffer), "%s%c", buffer, '^');
 		}
-		fprintf(stderr, "\n");
-		String::Utf8Value stack_trace(try_catch->StackTrace());
-		if (stack_trace.length() > 0) {
-			const char* stack_trace_string = ToCString(stack_trace);
-			fprintf(stderr, "%s\n", stack_trace_string);
+		snprintf(buffer, sizeof(buffer), "%s%c", buffer, '\n');
+
+		auto stackTrace = message->GetStackTrace();
+		if(!stackTrace.IsEmpty()){
+			int len = stackTrace->GetFrameCount();
+
+			for(int i = 0; i < len; ++i){
+				auto frame = stackTrace->GetFrame(i);
+				v8::String::Utf8Value scriptName(frame->GetScriptNameOrSourceURL());
+				v8::String::Utf8Value funName(frame->GetFunctionName());
+				
+				snprintf(buffer, sizeof(buffer), "%s%s - %s @ line %d\n", buffer, *scriptName, *funName, frame->GetLineNumber());
+			}
 		}
 	}
 
-	fprintf(stderr, "--------------------------------------------------------------------------------");
+	fprintf(stderr, "%s", buffer);
+	fprintf(stderr, "--------------------------------------------------------------------------------\n");
+
+	if(MPlugin::masterPlugin != -1){
+		auto master = GetPlugin(MPlugin::masterPlugin);
+		auto scriptData = message->GetScriptData();
+
+		if(master != NULL && master != this){
+			v8::Handle<v8::Value> args[2];
+			args[0] = v8::String::New("?");
+			if(!scriptData.IsEmpty()){
+				args[0] = scriptData->ToString();
+			}
+
+			args[1] = v8::String::New(buffer);
+			auto hooks = master->GetHooks("OnPluginError");
+			for(auto it = hooks->begin(); it != hooks->end(); ++it){
+				(*it)->Call(master->GetContext()->Global(), 2, args);
+			}
+		}
+	}
 }
 
 bool SMJS_Plugin::LoadFile(const char* file, bool asGlobal, v8::Handle<v8::Value> *result){
@@ -262,7 +295,10 @@ bool SMJS_Plugin::LoadFile(const char* file, bool asGlobal, v8::Handle<v8::Value
 	source[size] = '\0';
 	fclose(fileHandle);
 
-	bool res = RunString(path, source, asGlobal, result);
+	char filenameBuffer[512];
+	snprintf(filenameBuffer, sizeof(filenameBuffer), "%s/%s", dir.c_str(), file);
+
+	bool res = RunString(filenameBuffer, source, asGlobal, result);
 	delete[] source;
 	return res;
 }

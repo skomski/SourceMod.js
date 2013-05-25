@@ -47,6 +47,7 @@ SMJS_Client::SMJS_Client(edict_t *edict) : SMJS_Entity(NULL) {
 
 void SMJS_Client::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
 	SMJS_Entity::OnWrapperAttached(plugin, wrapper);
+	
 }
 
 void SMJS_Client::ReattachEntity(){

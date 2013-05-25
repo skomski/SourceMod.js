@@ -15,8 +15,12 @@ class MPlugin : public SMJS_Module {
 public:
 	MPlugin();
 
+	static PLUGIN_ID masterPlugin;
+
 	std::vector<v8::Persistent<v8::Object>> pluginInterfaces;
 	std::vector<InterfaceAddedCallback> interfaceAddedCallbacks;
+
+
 
 	void OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper);
 	void OnPluginDestroyed(SMJS_Plugin *plugin);
@@ -28,6 +32,7 @@ public:
 	FUNCTION_DECL(expose);
 	FUNCTION_DECL(get);
 	FUNCTION_DECL(getApiVersion);
+	FUNCTION_DECL(setMasterPlugin);
 
 	WRAPPED_CLS(MPlugin, SMJS_Module) {
 		temp->SetClassName(v8::String::NewSymbol("PluginModule"));
@@ -38,7 +43,6 @@ public:
 		WRAPPED_FUNC(expose);
 		WRAPPED_FUNC(get);
 		WRAPPED_FUNC(getApiVersion);
+		WRAPPED_FUNC(setMasterPlugin);
 	}
-
-	
 };

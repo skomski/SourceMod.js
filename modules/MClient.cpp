@@ -43,6 +43,7 @@ MClient::MClient(){
 void MClient::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
 	auto obj = wrapper->ToObject();
 
+	plugin->GetContext()->Global()->Set(v8::String::NewSymbol("Client"), SMJS_Client::GetTemplateForPlugin(plugin)->GetFunction());
 }
 
 void MClient::OnGameFrame(bool simulating){

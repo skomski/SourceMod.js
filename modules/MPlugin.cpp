@@ -6,6 +6,8 @@ WRAPPED_CLS_CPP(MPlugin, SMJS_Module);
 
 MPlugin* g_MPlugin;
 
+PLUGIN_ID MPlugin::masterPlugin = -1;
+
 MPlugin::MPlugin(){
 	identifier = "plugin";
 	g_MPlugin = this;
@@ -106,4 +108,11 @@ END
 
 FUNCTION_M(MPlugin::getApiVersion)
 	RETURN_SCOPED(v8::Int32::New(GetPluginRunning()->GetApiVersion()));
+END
+
+FUNCTION_M(MPlugin::setMasterPlugin)
+	if(GetPluginRunning()->IsSandboxed()) THROW("This function is not allowed to be called in sandboxed plugins");
+	masterPlugin = GetPluginRunning()->GetId();
+
+	RETURN_UNDEF;
 END
