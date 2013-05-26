@@ -58,8 +58,6 @@ SMJS g_SMJS;		/**< Global singleton for extension's main interface */
 
 SMEXT_LINK(&g_SMJS);
 
-void PatchVersionCheck();
-
 bool FindAndRunPlugins();
 bool FindAndRunAutoloadPlugins();
 bool LoadTrustedList();
@@ -81,7 +79,7 @@ bool SMJS::SDK_OnLoad(char *error, size_t maxlength, bool late){
 
 	if(!SMJS_LoadConfs(error, maxlength, late)) return false;
 
-	PatchVersionCheck();
+	
 
 	v8::V8::Initialize();
 	SMJS_Init();
@@ -314,37 +312,4 @@ void RegCommand(const char *cmdName, void(*func)(void*, const CCommand&)){
 	}else{
 		smutils->LogError(myself, "Couldn't register command %s", cmdName);
 	}
-}
-
-void PatchVersionCheck(){
-	uint8_t *ptr = (uint8_t*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), 
-	"\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x11\x8B\x82\x1C\x02\x00\x00\xFF\xD0\x8B\x2A\x2A\x2A\x2A\x2A"
-	"\x50\x51\x68\x2A\x2A\x2A\x2A\xFF\x2A\x2A\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x11\x8B"
-	"\x82\x98\x00\x00\x00\x83\xC4\x0C\x68\x2A\x2A\x2A\x2A\xFF\xD0", 59);
-
-	if(ptr == NULL){
-		printf("Failed to patch version check!\n");
-		smutils->LogError(myself, "Failed to patch version check!");
-		return;
-	}
-
-	SourceHook::SetMemAccess(ptr, 59, SH_MEM_READ | SH_MEM_WRITE | SH_MEM_EXEC);
-
-	for(int i = 35; i < 59; ++i){
-		ptr[i] = 0x90; // NOP
-	}
-
-	ptr = (uint8_t*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), 
-	"\x8B\x11\x8B\x82\x1C\x02\x00\x00\xFF\xD0\x8B\x2A\x2A\x2A\x2A\x2A\x50\x51\x68\x2A\x2A\x2A\x2A\xFF\x2A\x2A\x2A\x2A\x2A"
-	"\x83\xC4\x0C\x38\x2A\x2A\x2A\x2A\x2A\x74\x50", 40);
-
-	if(ptr == NULL){
-		printf("Failed to patch version check!\n");
-		smutils->LogError(myself, "Failed to patch version check!");
-		return;
-	}
-
-	SourceHook::SetMemAccess(ptr, 40, SH_MEM_READ | SH_MEM_WRITE | SH_MEM_EXEC);
-
-	ptr[38] = 0xEB; // JZ --> JMP
 }

@@ -4,8 +4,10 @@
 #include "CDetour/detours.h"
 #include "SMJS_Entity.h"
 #include "SMJS_VKeyValues.h"
+#include "sh_memory.h"
 
-
+#define WAIT_FOR_PLAYERS_COUNT_SIG "\x83\x3D****\x00\x7E\x19\x8B\x0D****\x83\x79\x30\x00"
+#define WAIT_FOR_PLAYERS_COUNT_SIG_LEN 19
 
 WRAPPED_CLS_CPP(MDota, SMJS_Module);
 
@@ -13,12 +15,18 @@ IGameConfig *dotaConf = NULL;
 void *LoadParticleFile;
 void *CreateUnit;
 
+int waitingForPlayersCount = 10;
+int *waitingForPlayersCountPtr = NULL;
+
 
 CDetour *parseUnitDetour;
 CDetour *getAbilityValueDetour;
 CDetour *clientPickHeroDetour;
 
 void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
+
+void PatchVersionCheck();
+void PatchWaitForPlayersCount();
 
 enum FieldType {
 	FT_Void = 0,
@@ -52,261 +60,13 @@ struct AbilityData {
 	uint32_t	flags;
 };
 
-DETOUR_DECL_MEMBER3(ParseUnit, void*, void*, a2, KeyValues*, keyvalues, void*, a4){
-	SMJS_Entity *entWrapper = GetEntityWrapper((CBaseEntity*) this);
-	
-	SMJS_VKeyValues *kv = NULL;
-
-	int len = GetNumPlugins();
-	for(int i = 0; i < len; ++i){
-		SMJS_Plugin *pl = GetPlugin(i);
-		if(pl == NULL) continue;
-		
-		HandleScope handle_scope(pl->GetIsolate());
-		Context::Scope context_scope(pl->GetContext());
-
-		auto hooks = pl->GetHooks("Dota_OnUnitParsed");
-
-		if(hooks->size() == 0) continue;
-
-		// The new way those functions are called makes it so it's too inefficient to support
-		// old plugins
-		if(pl->GetApiVersion() >= 4){
-			if(kv == NULL){
-				kv = new SMJS_VKeyValues((KeyValues2*) keyvalues);
-			}
-
-			v8::Handle<v8::Value> args[2];
-			args[0] = entWrapper->GetWrapper(pl);
-			args[1] = kv->GetWrapper(pl);
-			for(auto it = hooks->begin(); it != hooks->end(); ++it){
-				auto func = *it;
-				func->Call(pl->GetContext()->Global(), 2, args);
-			}
-		}
-	}
-
-	void *ret = DETOUR_MEMBER_CALL(ParseUnit)(a2, kv != NULL ? kv->kv : keyvalues, a4);
-	
-	if(kv != NULL){
-		kv->Restore();
-		kv->kv = NULL;
-		kv->Destroy();
-	}
-
-	return ret;
-}
-
-
-void CallGetAbilityValueHook(CBaseEntity *ability, AbilityData *data){
-	auto clsname = gamehelpers->GetEntityClassname((CBaseEntity*) ability);
-	auto entWrapper = GetEntityWrapper((CBaseEntity*) ability);
-
-	
-	int len = GetNumPlugins();
-	for(int i = 0; i < len; ++i){
-		SMJS_Plugin *pl = GetPlugin(i);
-		if(pl == NULL) continue;
-		
-		HandleScope handle_scope(pl->GetIsolate());
-		Context::Scope context_scope(pl->GetContext());
-
-		auto hooks = pl->GetHooks("Dota_OnGetAbilityValue");
-
-		if(hooks->size() == 0) continue;
-
-		v8::Handle<v8::Value> args[4];
-		args[0] = entWrapper->GetWrapper(pl);
-		args[1] = v8::String::New(clsname);
-		args[2] = v8::String::New(data->field);
-
-		auto arr = v8::Array::New();
-		int len = -1;
-
-		for(int i=0;i<10;++i){
-			++len;
-			if(data->values[i].type == FT_Int){
-				arr->Set(i, v8::Int32::New(data->values[i].value.asInt));
-			}else if(data->values[i].type == FT_Float){
-				arr->Set(i, v8::Number::New(data->values[i].value.asFloat));
-			}else if(data->values[i].type == FT_Void){
-				break;
-			}else{
-				printf("Unknown ability data type: %s.%s %d\n", clsname, data->field, data->values[i].type);
-			}
-		}
-		
-
-		args[3] = arr;
-
-		for(auto it = hooks->begin(); it != hooks->end(); ++it){
-			auto func = *it;
-			auto ret = func->Call(pl->GetContext()->Global(), 4, args);
-			if(!ret.IsEmpty() && !ret->IsUndefined()){
-				if(!ret->IsArray()) continue;
-				auto obj = ret->ToObject();
-				if(obj->Get(v8::String::New("length"))->Int32Value() != len) continue;
-				for(int i=0;i<len;++i){
-					if(data->values[i].type == FT_Int){
-						data->values[i].value.asInt = (int) obj->Get(i)->NumberValue();
-					}else if(data->values[i].type == FT_Float){
-						data->values[i].value.asFloat = (float) obj->Get(i)->NumberValue();
-					}
-				}
-
-				return;
-			}
-		}
-	}
-}
-
-DETOUR_DECL_STATIC1_STDCALL_NAKED(GetAbilityValue, uint8_t *, char*, a2){
-	void *ability;
-	AbilityData *data;
-	int abilityLevel;
-
-	__asm {
-		push	ebp
-		mov		ebp, esp
-		sub		esp, 64
-
-		mov		ability, eax
-
-		push	a2
-		mov		eax, ability
-		call	GetAbilityValue_Actual
-		mov		data, eax
-	}
-
-	__asm pushad
-	__asm pushfd
-
-	if(ability == NULL || data == NULL || strlen(a2) == 0) goto FEND;
-	
-	abilityLevel = *(int*)((intptr_t)ability + 984) - 1;
-	
-	CallGetAbilityValueHook((CBaseEntity*) ability, data);
-	
-	
-FEND:
-	__asm{
-		popfd
-		popad
-		mov		eax, data
-		leave
-		ret		4
-	}
-}
-
-const char* CallClientPickHero(CBaseEntity *client, CCommand *cmd, bool* block){
-	int len = GetNumPlugins();
-
-	auto clientWrapper = GetEntityWrapper(client);
-
-	*block = false;
-
-	for(int i = 0; i < len; ++i){
-		SMJS_Plugin *pl = GetPlugin(i);
-		if(pl == NULL) continue;
-		
-		HandleScope handle_scope(pl->GetIsolate());
-		Context::Scope context_scope(pl->GetContext());
-
-		auto hooks = pl->GetHooks("Dota_OnHeroPicked");
-
-		if(hooks->size() == 0) continue;
-		
-		if(pl->GetApiVersion() < 2){
-			v8::Handle<v8::Value> args = v8::String::New(cmd->Arg(1));
-
-			for(auto it = hooks->begin(); it != hooks->end(); ++it){
-				auto func = *it;
-				auto ret = func->Call(pl->GetContext()->Global(), 1, &args);
-				if(!ret.IsEmpty() && ret->IsString()){
-					v8::String::AsciiValue ascii(ret);
-					return *ascii;
-				}
-			}
-		}else{
-			v8::Handle<v8::Value> args[2];
-			args[0] = clientWrapper->GetWrapper(pl);
-			args[1] = v8::String::New(cmd->Arg(1));
-
-			for(auto it = hooks->begin(); it != hooks->end(); ++it){
-				auto func = *it;
-				auto ret = func->Call(pl->GetContext()->Global(), 2, args);
-				if(!ret.IsEmpty() && !ret->IsUndefined()){
-					if(ret->IsString()){
-						v8::String::AsciiValue ascii(ret);
-						char *str = new char[ascii.length() + 1];
-						strcpy(str, *ascii);
-						return str;
-					}else{
-						*block = true;
-						return NULL;
-					}
-				}
-			}
-		}
-	}
-	return NULL;
-}
-
-DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
-	CBaseEntity *client;
-	const char *newHero;
-	bool block;
-	CCommand *tmp;
-
-	__asm {
-		push	ebp
-		mov		ebp, esp
-		sub		esp, 64
-
-		mov		client, esi
-	}
-
-	__asm pushad
-	__asm pushfd
-	
-	block = false;
-	newHero = CallClientPickHero(client, cmd, &block);
-
-	if(!block){
-		if(newHero == NULL){
-			__asm {
-				push	cmd
-				mov		esi, client
-				call	ClientPickHero_Actual
-			}
-		}else{
-			// It has to be a pointer because I'm too lazy to calculate how much space
-			// CCommand would use in the stack
-			tmp = new CCommand(*cmd);
-
-			tmp->ArgV()[1] = newHero;
-
-			__asm {
-				push	tmp
-				mov		esi, client
-				call	ClientPickHero_Actual
-			}
-
-			delete newHero;
-			delete tmp;
-		}
-	}
-
-	__asm{
-		popfd
-		popad
-		leave
-		ret		4
-	}
-}
+#include "modules/MDota_Detours.h"
 
 MDota::MDota(){
 	identifier = "dota";
+
+	PatchVersionCheck();
+	PatchWaitForPlayersCount();
 
 	char conf_error[255] = "";
 	if (!gameconfs->LoadGameConfigFile("smjs.dota", &dotaConf, conf_error, sizeof(conf_error))){
@@ -345,6 +105,57 @@ MDota::MDota(){
 void MDota::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
 	auto obj = wrapper->ToObject();
 	
+}
+
+void PatchVersionCheck(){
+	uint8_t *ptr = (uint8_t*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), 
+	"\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x11\x8B\x82\x1C\x02\x00\x00\xFF\xD0\x8B\x2A\x2A\x2A\x2A\x2A"
+	"\x50\x51\x68\x2A\x2A\x2A\x2A\xFF\x2A\x2A\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x11\x8B"
+	"\x82\x98\x00\x00\x00\x83\xC4\x0C\x68\x2A\x2A\x2A\x2A\xFF\xD0", 59);
+
+	if(ptr == NULL){
+		printf("Failed to patch version check!\n");
+		smutils->LogError(myself, "Failed to patch version check!");
+		return;
+	}
+
+	SourceHook::SetMemAccess(ptr, 59, SH_MEM_READ | SH_MEM_WRITE | SH_MEM_EXEC);
+
+	for(int i = 35; i < 59; ++i){
+		ptr[i] = 0x90; // NOP
+	}
+
+	ptr = (uint8_t*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), 
+	"\x8B\x11\x8B\x82\x1C\x02\x00\x00\xFF\xD0\x8B\x2A\x2A\x2A\x2A\x2A\x50\x51\x68\x2A\x2A\x2A\x2A\xFF\x2A\x2A\x2A\x2A\x2A"
+	"\x83\xC4\x0C\x38\x2A\x2A\x2A\x2A\x2A\x74\x50", 40);
+
+	if(ptr == NULL){
+		printf("Failed to patch version check!\n");
+		smutils->LogError(myself, "Failed to patch version check!");
+		return;
+	}
+
+	SourceHook::SetMemAccess(ptr, 40, SH_MEM_READ | SH_MEM_WRITE | SH_MEM_EXEC);
+
+	ptr[38] = 0xEB; // JZ --> JMP
+}
+
+void PatchWaitForPlayersCount(){
+	uint8_t *ptr = (uint8_t*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), WAIT_FOR_PLAYERS_COUNT_SIG, WAIT_FOR_PLAYERS_COUNT_SIG_LEN);
+
+	if(ptr == NULL){
+		printf("Failed to patch dota_wait_for_players_to_load_count (not critical)\n");
+		return;
+	}
+
+	SourceHook::SetMemAccess(ptr, WAIT_FOR_PLAYERS_COUNT_SIG_LEN, SH_MEM_READ | SH_MEM_WRITE | SH_MEM_EXEC);
+	
+	waitingForPlayersCountPtr = *((int **)((intptr_t) ptr + 2));
+	*waitingForPlayersCountPtr = waitingForPlayersCount;
+	*((int **)((intptr_t) ptr + 2)) = &waitingForPlayersCount;
+	
+
+	printf("Patched dota_wait_for_players_to_load_count successfully\n");
 }
 
 FUNCTION_M(MDota::loadParticleFile)
@@ -455,7 +266,7 @@ const char* MDota::HeroIdToClassname(int id) {
 		case Hero_Visage: return "npc_dota_hero_visage";
 		case Hero_Slark: return "npc_dota_hero_slark";
 		case Hero_Medusa: return "npc_dota_hero_medusa";
-		case Hero_TrollWarlord: return "npc_dota_hero_troll";
+		case Hero_TrollWarlord: return "npc_dota_hero_troll_warlord";
 		case Hero_CentaurWarchief: return "npc_dota_hero_centaur";
 		case Hero_Magnus: return "npc_dota_hero_magnataur";
 		case Hero_Timbersaw: return "npc_dota_hero_shredder";
@@ -545,5 +356,22 @@ FUNCTION_M(MDota::findClearSpaceForUnit)
 	targetEntity = other->ent;
 
 	FindClearSpaceForUnit(targetEntity, Vector(x, y, z), true);
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(MDota::setWaitForPlayersCount)
+	PINT(c);
+
+	waitingForPlayersCount = c;
+	if(waitingForPlayersCountPtr != NULL){
+		*waitingForPlayersCountPtr = c;
+	}
+
+	auto d2fixupsConVar = icvar->FindVar("dota_wait_for_players_to_load_count");
+	
+	if(d2fixupsConVar != NULL){
+		d2fixupsConVar->SetValue(c);
+	}
+
 	RETURN_UNDEF;
 END

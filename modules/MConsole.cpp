@@ -293,6 +293,7 @@ FUNCTION_M(MConsole::findConVar)
 	if(plugin->IsSandboxed()){
 		if(strcmp(*cvarName, "sv_password") == 0) return v8::Null();
 		if(strcmp(*cvarName, "rcon_password") == 0) return v8::Null();
+		if(strcmp(*cvarName, "sv_cheats") == 0) return v8::Null();
 	}
 
 	ConVar *cv = icvar->FindVar(*cvarName);

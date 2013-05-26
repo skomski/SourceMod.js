@@ -286,5 +286,8 @@
     <ClInclude Include="..\..\..\hl2sdk-dota\public\engine\protobuf\netmessages.pb.h">
       <Filter>Dota</Filter>
     </ClInclude>
+    <ClInclude Include="..\modules\MDota_Detours.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1263,6 +1263,7 @@
     <ClInclude Include="..\clsocket\SimpleSocket.h" />
     <ClInclude Include="..\clsocket\StatTimer.h" />
     <ClInclude Include="..\modules\MDota.h" />
+    <ClInclude Include="..\modules\MDota_Detours.h" />
     <ClInclude Include="..\modules\MEngine.h" />
     <ClInclude Include="..\modules\MEntities.h" />
     <ClInclude Include="..\modules\MGame.h" />
