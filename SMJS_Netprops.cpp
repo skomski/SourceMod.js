@@ -244,8 +244,6 @@ v8::Handle<v8::Value> SMJS_Netprops::SSetNetProp(void *ent, edict_t *edict, Send
 			
 			if(!lowBits->IsNumber() || !highBits->IsNumber()) THROW("Value must be an array with 2 numberic elements");
 
-			printf("%d %d\n", lowBits->Uint32Value(), highBits->Uint32Value());
-
 			*(uint32_t * )addr = lowBits->Uint32Value();
 			*(uint32_t * )((intptr_t) addr + 4) = highBits->Uint32Value();
 		}else if (bit_count >= 17){

@@ -252,3 +252,36 @@ DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
 		ret		4
 	}
 }
+
+DETOUR_DECL_STATIC4_STDCALL(HeroBuyItem, signed int, CBaseEntity*, unit, char*, item, int, playerID, signed int, a4){
+	auto unitWrapper = GetEntityWrapper(unit);
+
+	int len = GetNumPlugins();
+	for(int i = 0; i < len; ++i){
+		SMJS_Plugin *pl = GetPlugin(i);
+		if(pl == NULL) continue;
+		
+		HandleScope handle_scope(pl->GetIsolate());
+		Context::Scope context_scope(pl->GetContext());
+
+		auto hooks = pl->GetHooks("Dota_OnBuyItem");
+
+		if(hooks->size() == 0) continue;
+
+		v8::Handle<v8::Value> args[4];
+		args[0] = unitWrapper->GetWrapper(pl);
+		args[1] = v8::String::New(item);
+		args[2] = v8::Int32::New(playerID);
+		args[3] = v8::Int32::New(a4);
+
+		for(auto it = hooks->begin(); it != hooks->end(); ++it){
+			auto func = *it;
+			auto res = func->Call(pl->GetContext()->Global(), 4, args);
+			if(!res.IsEmpty() && !res->IsUndefined() && res->IsFalse()){
+				return -1;
+			}
+		}
+	}
+
+	return DETOUR_STATIC_CALL(HeroBuyItem)(unit, item, playerID, a4);
+}

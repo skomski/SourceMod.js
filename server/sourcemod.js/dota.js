@@ -79,6 +79,16 @@ dota.getTotalExpRequiredForLevel = function(level){
 	return totalExpRequired[level];
 }
 
+dota.findClientByPlayerID = function(playerId){
+	for(var i = 0; i < server.clients.length; ++i){
+		var c = server.clients[i];
+		if(c == null) continue;
+		if(!c.isInGame()) continue;
+		if(c.netprops.m_iPlayerID === playerId) return c;
+	}
+	return null;
+}
+
 Client.prototype.getPlayerID = function(){
 	if(this._cachedPlayerID && this._cachedPlayerID != -1) return this._cachedPlayerID;
 	return this._cachedPlayerID = this.netprops.m_iPlayerID;

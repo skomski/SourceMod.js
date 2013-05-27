@@ -11,22 +11,22 @@
 
 WRAPPED_CLS_CPP(MDota, SMJS_Module);
 
-IGameConfig *dotaConf = NULL;
-void *LoadParticleFile;
-void *CreateUnit;
+static IGameConfig *dotaConf = NULL;
+static void *LoadParticleFile;
+static void *CreateUnit;
 
-int waitingForPlayersCount = 10;
-int *waitingForPlayersCountPtr = NULL;
+static int waitingForPlayersCount = 10;
+static int *waitingForPlayersCountPtr = NULL;
 
+static CDetour *parseUnitDetour;
+static CDetour *getAbilityValueDetour;
+static CDetour *clientPickHeroDetour;
+static CDetour *heroBuyItemDetour;
 
-CDetour *parseUnitDetour;
-CDetour *getAbilityValueDetour;
-CDetour *clientPickHeroDetour;
+static void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
 
-void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
-
-void PatchVersionCheck();
-void PatchWaitForPlayersCount();
+static void PatchVersionCheck();
+static void PatchWaitForPlayersCount();
 
 enum FieldType {
 	FT_Void = 0,
@@ -88,6 +88,11 @@ MDota::MDota(){
 	clientPickHeroDetour = DETOUR_CREATE_STATIC(ClientPickHero, "ClientPickHero");
 	if(clientPickHeroDetour) clientPickHeroDetour->EnableDetour();
 	
+	heroBuyItemDetour = DETOUR_CREATE_STATIC(HeroBuyItem, "HeroBuyItem");
+	if(heroBuyItemDetour) heroBuyItemDetour->EnableDetour();
+	
+	
+
 	if(!dotaConf->GetMemSig("LoadParticleFile", &LoadParticleFile) || LoadParticleFile == NULL){
 		smutils->LogError(myself, "Couldn't sigscan LoadParticleFile");
 	}
