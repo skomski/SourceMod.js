@@ -1,4 +1,7 @@
 (function(){
+
+var playerManager = null;
+
 var totalExpRequired = [
 	0,
 	0,
@@ -56,7 +59,7 @@ dota.setUnitWaypoint = function(unit, waypoint){
 	unit.setDataEnt(10036, waypoint);
 }
 
-dota.setHeroLevel = function(client, hero, level){
+dota.setHeroLevel = function(hero, level){
 	var levelDiff = level - hero.netprops.m_iCurrentLevel;
 	
 	if(levelDiff != 0){
@@ -66,8 +69,6 @@ dota.setHeroLevel = function(client, hero, level){
 		hero.netprops.m_flIntellect += hero.datamaps.m_flIntellectGain * levelDiff;
 		
 		hero.netprops.m_iAbilityPoints = Math.max(0, hero.netprops.m_iAbilityPoints + levelDiff);
-		
-		if(client) playerManager.netprops.m_iLevel[client.netprops.m_iPlayerID] = level;
 	}
 	
 	if(hero.netprops.m_iCurrentXP < totalExpRequired[level]){
@@ -88,12 +89,43 @@ dota.findClientByPlayerID = function(playerId){
 	}
 	return null;
 }
+/*
+game.hook("OnMapStart", function(){
+	playerManager = game.findEntityByClassname(-1, "dota_player_manager");
+});*/
 
 Client.prototype.getPlayerID = function(){
 	if(this._cachedPlayerID && this._cachedPlayerID != -1) return this._cachedPlayerID;
 	return this._cachedPlayerID = this.netprops.m_iPlayerID;
 }
 
-new Client();
+Client.prototype.getHeroes = function(){
+	var hero = this.netprops.m_hAssignedHero;
+	if(hero == null){
+		return [];
+	}
+	
+	// Cache the check if this client has meepo
+	if(typeof this._isMeepo == 'undefined'){
+		this._isMeepo = (hero.getClassname() == 'npc_dota_hero_meepo');
+	}
+	
+	if(this._isMeepo){
+		// Ensure that the primary meepo will always be the first one in the array
+		var meepos = game.findEntitiesByClassname('npc_dota_hero_meepo');
+		var i = 0;
+		if((i = meepos.indexOf(hero)) != 0){
+			var tmp = meepos[0];
+			meepos[0] = hero;
+			meepos[i] = tmp;
+		}
+		
+		return meepos;
+	}else{
+		return [hero];
+	}
+}
+
+
 
 })();
