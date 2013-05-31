@@ -1,8 +1,8 @@
 #pragma once
 #include "SMJS_Module.h"
-#include "SMJS_ClientWrapper.h"
 #include <vector>
 #include <map>
+#include "SMJS_Client.h"
 
 #define MAXCLIENTS 24
 

@@ -24,6 +24,9 @@ static CDetour *clientPickHeroDetour;
 static CDetour *heroBuyItemDetour;
 
 static void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
+static CBaseEntity* (*DCreateItem)(const char *item, void *unit, void *unit2);
+static int (__stdcall *DGiveItem)(CBaseEntity *inventory, int a4, int a5, char a6); // eax = 0, ecx = item
+static void (*DActivateItem)(CBaseEntity *item);
 
 static void PatchVersionCheck();
 static void PatchWaitForPlayersCount();
@@ -105,6 +108,17 @@ MDota::MDota(){
 		smutils->LogError(myself, "Couldn't sigscan FindClearSpaceForUnit");
 	}
 	
+	if(!dotaConf->GetMemSig("DCreateItem", (void**) &DCreateItem) || DCreateItem == NULL){
+		smutils->LogError(myself, "Couldn't sigscan DCreateItem");
+	}
+
+	if(!dotaConf->GetMemSig("DGiveItem", (void**) &DGiveItem) || DGiveItem == NULL){
+		smutils->LogError(myself, "Couldn't sigscan DGiveItem");
+	}
+
+	if(!dotaConf->GetMemSig("DActivateItem", (void**) &DActivateItem) || DActivateItem == NULL){
+		smutils->LogError(myself, "Couldn't sigscan DActivateItem");
+	}
 }
 
 void MDota::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
@@ -379,4 +393,47 @@ FUNCTION_M(MDota::setWaitForPlayersCount)
 	}
 
 	RETURN_UNDEF;
+END
+
+FUNCTION_M(MDota::giveItemToHero)
+	PSTR(itemClsname);
+	POBJ(unit);
+
+	SMJS_Entity *ent;
+
+	auto inte = unit->GetInternalField(0);
+	if(inte.IsEmpty()){
+		THROW("Invalid other entity");
+	}
+
+	ent = dynamic_cast<SMJS_Entity*>((SMJS_Base*) v8::Handle<v8::External>::Cast(inte)->Value());
+	if(ent == NULL) THROW("Invalid other entity");
+	
+	auto item = DCreateItem(*itemClsname, ent->ent, ent->ent);
+	if(item == NULL){
+		RETURN_SCOPED(v8::Boolean::New(false));
+	}
+
+	auto inventory = (CBaseEntity*)((intptr_t)ent->ent + 10240);
+
+	int res;
+
+	__asm{
+		push	0
+		push	-1
+		push	3
+		push	inventory
+		mov		eax, 0
+		mov		ecx, item
+		call	DGiveItem
+		mov		res, eax
+	}
+
+	if(res == -1){
+		RETURN_SCOPED(v8::Boolean::New(false));
+	}
+
+	DActivateItem(item);
+
+	RETURN_SCOPED(v8::Boolean::New(true));
 END

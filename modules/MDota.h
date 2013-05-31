@@ -128,6 +128,7 @@ public:
 	FUNCTION_DECL(createUnit);
 	FUNCTION_DECL(findClearSpaceForUnit);
 	FUNCTION_DECL(setWaitForPlayersCount);
+	FUNCTION_DECL(giveItemToHero);
 
 	WRAPPED_CLS(MDota, SMJS_Module) {
 		temp->SetClassName(v8::String::NewSymbol("DotaModule"));
@@ -138,6 +139,7 @@ public:
 		WRAPPED_FUNC(createUnit);
 		WRAPPED_FUNC(findClearSpaceForUnit);
 		WRAPPED_FUNC(setWaitForPlayersCount);
+		WRAPPED_FUNC(giveItemToHero);
 
 #define HERO_ID_CONST(name, value) proto->Set(v8::String::New("HERO_" #name), v8::Int32::New(Hero_##value), v8::ReadOnly);
 		

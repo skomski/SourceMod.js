@@ -66,6 +66,40 @@
 				"library"	"server"
 				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x24\x8B\x45\x10\x53\x56\x57\x50\xE8****\x89\x44\x24\x0C\x85\xC0\x0F"
 			}
+			
+			/*
+				int __cdecl DCreateItem(char *item, void *unit, void *unit)
+				
+				Called by dota_create_item
+			*/
+			"DCreateItem"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x8B\x55\x10\x81\xEC\xA4\x00\x00\x00\x53\x56\x57\x85\xD2\x74\x12\x80\xBA\x1C\x01\x00\x00\x00\x74\x09\xF6\x82\x5C\x09\x00\x00\x01\x75\x52\x8B\x8A\xC4\x01\x00\x00\x83\xF9"
+			}
+			
+			/*
+				signed int __userpurge DGiveItem<eax>(int a1<eax>, void *item<ecx>, void *inventory, int a4, int a5, char a6);
+				GiveItem(0, item, hero + 10240, 3, -1, 0)
+				
+				Called by dota_create_item
+			*/
+			"DGiveItem"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x2C\x53\x8B\x5D\x08\x56\x57\x8B\xF1\x8B\xF8\x8B\x86\x54\x01\x00\x00"
+			}
+			
+			/*
+				void __cdecl DActivateItem(void *item)
+				
+				Called by dota_create_item
+			*/
+			"DActivateItem"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x56\x8B\x75\x08\x57\x85\xF6\x74\x74\x8B\x46\x08\xF6\x80\x20\x01\x00\x00\x01"
+			}
 		}
 		
 		"Offsets"

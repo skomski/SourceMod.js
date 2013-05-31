@@ -35,7 +35,6 @@
 
 #include "sh_memory.h"
 
-#include "SMJS_ClientWrapper.h"
 #include "modules/MPlugin.h"
 #include "modules/MConsole.h"
 #include "modules/MServer.h"
