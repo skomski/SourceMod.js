@@ -193,7 +193,7 @@ const char* MDota::HeroIdToClassname(int id) {
 		case Hero_Puck: return "npc_dota_hero_puck";
 		case Hero_Pudge: return "npc_dota_hero_pudge";
 		case Hero_Razor: return "npc_dota_hero_razor";
-		case Hero_SandKing: return "npc_dota_hero_sandking";
+		case Hero_SandKing: return "npc_dota_hero_sand_king";
 		case Hero_StormSpirit: return "npc_dota_hero_storm_spirit";
 		case Hero_Sven: return "npc_dota_hero_sven";
 		case Hero_Tiny: return "npc_dota_hero_tiny";
