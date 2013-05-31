@@ -211,7 +211,6 @@ SMJS_Plugin *LoadPlugin(const char *dir){
 	plugin->SetPath(path);
 	plugin->CheckApi();
 
-
 	plugin->LoadModules();
 
 	if(!plugin->LoadFile("Main.js", true)){
