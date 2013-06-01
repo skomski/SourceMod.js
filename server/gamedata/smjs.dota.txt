@@ -91,11 +91,11 @@
 			}
 			
 			/*
-				void __cdecl DActivateItem(void *item)
+				void __cdecl DDestroyItem(void *item)
 				
 				Called by dota_create_item
 			*/
-			"DActivateItem"
+			"DDestroyItem"
 			{
 				"library"	"server"
 				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x56\x8B\x75\x08\x57\x85\xF6\x74\x74\x8B\x46\x08\xF6\x80\x20\x01\x00\x00\x01"

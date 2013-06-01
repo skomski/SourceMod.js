@@ -26,7 +26,7 @@ static CDetour *heroBuyItemDetour;
 static void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
 static CBaseEntity* (*DCreateItem)(const char *item, void *unit, void *unit2);
 static int (__stdcall *DGiveItem)(CBaseEntity *inventory, int a4, int a5, char a6); // eax = 0, ecx = item
-static void (*DActivateItem)(CBaseEntity *item);
+static void (*DDestroyItem)(CBaseEntity *item);
 
 static void PatchVersionCheck();
 static void PatchWaitForPlayersCount();
@@ -116,8 +116,8 @@ MDota::MDota(){
 		smutils->LogError(myself, "Couldn't sigscan DGiveItem");
 	}
 
-	if(!dotaConf->GetMemSig("DActivateItem", (void**) &DActivateItem) || DActivateItem == NULL){
-		smutils->LogError(myself, "Couldn't sigscan DActivateItem");
+	if(!dotaConf->GetMemSig("DDestroyItem", (void**) &DDestroyItem) || DDestroyItem == NULL){
+		smutils->LogError(myself, "Couldn't sigscan DDestroyItem");
 	}
 }
 
@@ -429,11 +429,10 @@ FUNCTION_M(MDota::giveItemToHero)
 		mov		res, eax
 	}
 
-	if(res == -1){
+	if(res != -1) {
+		DDestroyItem(item);
 		RETURN_SCOPED(v8::Boolean::New(false));
 	}
-
-	DActivateItem(item);
 
 	RETURN_SCOPED(v8::Boolean::New(true));
 END
