@@ -8,7 +8,10 @@ v8::Isolate *mainIsolate;
 
 time_t lastPing;
 bool isPaused = false;
-SourceMod::IMutex *pingMutex;
+
+uv_thread_t checkerThread;
+uv_mutex_t primaryMutex;
+uv_loop_t *uvLoop;
 
 //TODO: Read this from sourcemod.js/dota.js
 const char *scriptDotaStr = NULL;
@@ -18,12 +21,11 @@ static void SMJS_OnPausedTick();
 static void OnMessage(Handle<Message> message, Handle<Value> error);
 static char* FileToString(const char *file, const char* dir);
 
-class SMJS_CheckerThread : public SourceMod::IThread{
-	void RunThread(IThreadHandle *pHandle);
-	void OnTerminate(IThreadHandle *pHandle, bool cancel){}
-};
+void checkerThreadFunc(void*);
 
 void SMJS_Init(){
+	uvLoop = uv_default_loop();
+
 	mainIsolate = v8::Isolate::GetCurrent();
 	HandleScope handle_scope(mainIsolate);
 
@@ -39,15 +41,14 @@ void SMJS_Init(){
 
 	v8::V8::AddMessageListener(OnMessage);
 
-	
-	pingMutex = threader->MakeMutex();
+	uv_mutex_init(&primaryMutex);
 	SMJS_Ping();
-	threader->MakeThread(new SMJS_CheckerThread());
+	uv_thread_create(&checkerThread, checkerThreadFunc, NULL);
 }
 
-void SMJS_CheckerThread::RunThread(IThreadHandle *pHandle){
+void checkerThreadFunc(void*){
 	while(1){
-		pingMutex->Lock();
+		uv_mutex_lock(&primaryMutex);
 
 		int now = time(NULL);
 		if(!isPaused && now - lastPing > 30){
@@ -65,8 +66,12 @@ void SMJS_CheckerThread::RunThread(IThreadHandle *pHandle){
 #endif
 		}
 
-		pingMutex->Unlock();
-		threader->ThreadSleep(1000);
+		uv_mutex_unlock(&primaryMutex);
+#ifdef WIN32
+		Sleep(1000);
+#else
+		sleep(1);
+#endif
 	}
 }
 
@@ -145,48 +150,53 @@ void OnMessage(Handle<Message> message, Handle<Value> error){
 }
 
 void SMJS_Ping(){
-	pingMutex->Lock();
+	uv_mutex_lock(&primaryMutex);
 	lastPing = time(NULL);
-	pingMutex->Unlock();
+	uv_mutex_unlock(&primaryMutex);
 }
 
 void SMJS_Pause(){
 	printf("Entering in deep sleep\n");
 
-	pingMutex->Lock();
+	uv_mutex_lock(&primaryMutex);
 	if(isPaused){
-		pingMutex->Unlock();
+		uv_mutex_unlock(&primaryMutex);
 		return;
 	}
 
 	isPaused = true;
-	pingMutex->Unlock();
+	uv_mutex_unlock(&primaryMutex);
 
 	while(1){
-		pingMutex->Lock();
+		uv_mutex_lock(&primaryMutex);
 		if(!isPaused){
-			pingMutex->Unlock();
+			uv_mutex_unlock(&primaryMutex);
 			return;
 		}
 
-		pingMutex->Unlock();
+		uv_mutex_unlock(&primaryMutex);
 
 		SMJS_OnPausedTick();
 
-		threader->ThreadSleep(100);
+#ifdef WIN32
+		Sleep(100);
+#else
+		usleep(100000);
+#endif
+		
 	}
 }
 
 void SMJS_Resume(){
-	pingMutex->Lock();
+	uv_mutex_lock(&primaryMutex);
 	if(!isPaused){
-		pingMutex->Unlock();
+		uv_mutex_unlock(&primaryMutex);
 		return;
 	}
 
 	lastPing = time(NULL);
 	isPaused = false;
-	pingMutex->Unlock();
+	uv_mutex_unlock(&primaryMutex);
 }
 
 void SMJS_OnPausedTick(){

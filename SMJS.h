@@ -2,6 +2,11 @@
 #ifndef _INCLUDE_SMJS_H_
 #define _INCLUDE_SMJS_H_
 
+#ifdef WIN32
+	#pragma comment(lib, "psapi.lib")
+	#pragma comment(lib, "iphlpapi.lib")
+#endif
+
 __pragma(warning(disable:4005) )
 #include <stdint.h>
 #define HAVE_STDINT_
@@ -10,6 +15,7 @@ __pragma(warning(disable:4005) )
 #define V8STDINT_H_
 #include "v8.h"
 #include "k7v8macros.h"
+#include "uv.h"
 
 __pragma(warning(default:4005) )
 
@@ -38,6 +44,8 @@ extern v8::Isolate *mainIsolate;
 
 extern const char *scriptDotaStr;
 extern v8::ScriptData *scriptDotaData;
+
+extern uv_loop_t *uvLoop;
 
 
 #endif
