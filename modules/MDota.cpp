@@ -16,7 +16,8 @@ static void *LoadParticleFile;
 static void *CreateUnit;
 
 static int waitingForPlayersCount = 10;
-static int *waitingForPlayersCountPtr = NULL;
+static int* waitingForPlayersCountPtr = NULL;
+static int* expRequiredForLevel = NULL;
 
 static CDetour *parseUnitDetour;
 static CDetour *getAbilityValueDetour;
@@ -119,6 +120,11 @@ MDota::MDota(){
 	if(!dotaConf->GetMemSig("DDestroyItem", (void**) &DDestroyItem) || DDestroyItem == NULL){
 		smutils->LogError(myself, "Couldn't sigscan DDestroyItem");
 	}
+
+	expRequiredForLevel = (int*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), "\x00\x00\x00\x00\xC8\x00\x00\x00\xF4\x01\x00\x00\x84\x03\x00\x00\x78\x05\x00\x00", 20);
+	if(expRequiredForLevel == NULL){
+		smutils->LogError(myself, "Couldn't find expRequiredForLevel\n");
+	}
 }
 
 void MDota::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
@@ -163,7 +169,7 @@ void PatchWaitForPlayersCount(){
 	uint8_t *ptr = (uint8_t*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), WAIT_FOR_PLAYERS_COUNT_SIG, WAIT_FOR_PLAYERS_COUNT_SIG_LEN);
 
 	if(ptr == NULL){
-		printf("Failed to patch dota_wait_for_players_to_load_count (not critical)\n");
+		printf("Failed to patch dota_wait_for_players_to_load_count\n");
 		return;
 	}
 
@@ -172,9 +178,6 @@ void PatchWaitForPlayersCount(){
 	waitingForPlayersCountPtr = *((int **)((intptr_t) ptr + 2));
 	*waitingForPlayersCountPtr = waitingForPlayersCount;
 	*((int **)((intptr_t) ptr + 2)) = &waitingForPlayersCount;
-	
-
-	printf("Patched dota_wait_for_players_to_load_count successfully\n");
 }
 
 FUNCTION_M(MDota::loadParticleFile)
@@ -435,4 +438,31 @@ FUNCTION_M(MDota::giveItemToHero)
 	}
 
 	RETURN_SCOPED(v8::Boolean::New(true));
+END
+
+
+FUNCTION_M(MDota::getTotalExpRequiredForLevel)
+	if(expRequiredForLevel == NULL){
+		RETURN_INT(0);
+	}
+
+	PINT(level);
+
+	if(level < 1) THROW_VERB("Invalid level", level);
+	if(level > 25) THROW_VERB("Invalid level", level);
+	RETURN_INT(expRequiredForLevel[level - 1]);
+END
+
+FUNCTION_M(MDota::setTotalExpRequiredForLevel)
+	if(expRequiredForLevel == NULL) RETURN_UNDEF;
+
+	PINT(level);
+	PINT(exp);
+
+	if(level <= 1) THROW_VERB("Invalid level", level);
+	if(level > 25) THROW_VERB("Invalid level", level);
+
+	expRequiredForLevel[level - 1] = exp;
+
+	RETURN_UNDEF;
 END

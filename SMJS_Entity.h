@@ -36,6 +36,7 @@ public:
 	FUNCTION_DECL(getData);
 	FUNCTION_DECL(setDataEnt);
 	FUNCTION_DECL(teleport);
+	FUNCTION_DECL(changeTeam);
 
 	WRAPPED_CLS(SMJS_Entity, SMJS_BaseWrapped) {
 		temp->SetClassName(v8::String::NewSymbol("Entity"));
@@ -53,6 +54,8 @@ public:
 		WRAPPED_FUNC(getData);
 		WRAPPED_FUNC(setDataEnt);
 		WRAPPED_FUNC(teleport);
+		WRAPPED_FUNC(changeTeam);
+
 	}
 
 private:

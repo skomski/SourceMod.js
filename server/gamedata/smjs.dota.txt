@@ -95,10 +95,54 @@
 				
 				Called by dota_create_item
 			*/
+			
 			"DDestroyItem"
 			{
 				"library"	"server"
 				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x56\x8B\x75\x08\x57\x85\xF6\x74\x74\x8B\x46\x08\xF6\x80\x20\x01\x00\x00\x01"
+			}
+			
+			
+			/*
+				Found in HasModifier, or any function that calls FindFactory
+			*/
+			"CModifierFactoryDictionaryPointer"
+			{
+				"library"	"server"
+				"windows"	"****\xE8****\x8B\xC8\x89\x4D\x08\x85\xC9\x75\x18\x56\x68"
+			}
+			
+			/*
+				void* __userpurge HasModifier<eax>(char *modifier<eax>, void *m_ModifierManager, void *unknown)
+				
+				"No factory for %s!\n"
+			*/
+			
+			"HasModifier"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\xF6\x05****\x01\x53\x8B\x5D\x08\x56\x57\x8B\xF0\x75\x19\x83\x0D****\x01\xE8"
+			}
+			
+			/*
+				void* __stdcall CModifierFactoryDictionary::FindFactory(CModifierFactoryDictionary *this, char *modifier)
+			*/
+			
+			"FindFactory"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x0C\xA1****\x53\x66\x0F\x57\xC0\x56\x66\x0F\x13\x44\x24\x0C\x83\x78\x0C\x00\x57\x74\x3C************************************************************\x8B\x70\x0C\x8B\x4D\x08"
+			}
+			
+			/*
+				void* __thiscall CreateModifier(CModifierFactoryDictionary *this, char *modifier)
+				
+				"Attempted to create unknown modifier type %s!\n"
+			*/
+			"CreateModifier"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x56\x8B\x75\x08\x56\x51\xE8****\x85\xC0\x75*\x56\x68****\xFF\x15****\x83\xC4\x08\x33\xC0"
 			}
 		}
 		

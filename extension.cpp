@@ -208,9 +208,8 @@ SMJS_Plugin *LoadPlugin(const char *dir){
 
 	plugin->SetDir(dir);
 	plugin->SetPath(path);
-	plugin->CheckApi();
-
 	plugin->LoadModules();
+	plugin->CheckApi();
 
 	if(!plugin->LoadFile("Main.js", true)){
 		delete plugin;

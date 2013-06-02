@@ -380,3 +380,44 @@ FUNCTION_M(SMJS_Entity::teleport)
 
 	RETURN_UNDEF;
 END
+
+FUNCTION_M(SMJS_Entity::changeTeam)
+	GET_INTERNAL(SMJS_Entity*, self);
+	if(!self->valid) THROW("Invalid entity");
+
+	static ICallWrapper *g_pChangeTeam = NULL;
+	if (!g_pChangeTeam){
+		int offset;
+		/*
+		if (!sdkToolsConf->GetOffset("ChangeTeam", &offset)){
+			THROW("\"ChangeTeam\" not supported by this mod");
+		}*/
+
+		offset = 99;
+	
+		PassInfo pass[1];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(int);
+		
+		if (!(g_pChangeTeam = binTools->CreateVCall(offset, 0, 0, NULL, pass, 1))){
+			THROW("\"ChangeTeam\" wrapper failed to initialized");
+		}
+	}
+	
+	PNUM(team);
+
+	unsigned char vstk[sizeof(void *) + sizeof(int)];
+	unsigned char *vptr = vstk;
+	
+	*(void **)vptr = self->ent;
+	vptr += sizeof(void *);
+
+	*(int *)vptr = team;
+	vptr += sizeof(void *);
+
+	void *ret;
+	g_pChangeTeam->Execute(vstk, &ret);
+
+	RETURN_UNDEF;
+END

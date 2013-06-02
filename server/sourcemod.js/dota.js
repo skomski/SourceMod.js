@@ -2,35 +2,6 @@
 
 var playerManager = null;
 
-var totalExpRequired = [
-	0,
-	0,
-	200,
-	500,
-	900,
-	1400,
-	2000,
-	2600,
-	3200,
-	4400,
-	5400,
-	6500,
-	7700,
-	9000,
-	10400,
-	11900,
-	13500,
-	15200,
-	17000,
-	18900,
-	20900,
-	23000,
-	25200,
-	27500,
-	29900,
-	32400
-];
-
 dota.MAX_PLAYERS = 24;
 
 dota.STATE_INIT = 0;
@@ -71,13 +42,10 @@ dota.setHeroLevel = function(hero, level){
 		hero.netprops.m_iAbilityPoints = Math.max(0, hero.netprops.m_iAbilityPoints + levelDiff);
 	}
 	
-	if(hero.netprops.m_iCurrentXP < totalExpRequired[level]){
-		hero.netprops.m_iCurrentXP = totalExpRequired[level];
+	var expRequired = dota.getTotalExpRequiredForLevel(level);
+	if(hero.netprops.m_iCurrentXP < expRequired){
+		hero.netprops.m_iCurrentXP = expRequired;
 	}
-}
-
-dota.getTotalExpRequiredForLevel = function(level){
-	return totalExpRequired[level];
 }
 
 dota.findClientByPlayerID = function(playerId){

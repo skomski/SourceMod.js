@@ -38,6 +38,7 @@ SMJS_Plugin::SMJS_Plugin(bool isSandboxed){
 	id = numPlugins++;
 	plugins.push_back(this);
 	this->isSandboxed = isSandboxed;
+	apiVersion = SMJS_API_VERSION;
 
 	isolate = mainIsolate; //v8::Isolate::New();
 
@@ -327,6 +328,7 @@ void SMJS_Plugin::CheckApi(){
 	fread(str, sizeof(str[0]), sizeof(str) / sizeof(str[0]), fileHandle);
 	fclose(fileHandle);
 	apiVersion = atoi(str);
+	if(apiVersion == 0) apiVersion = SMJS_API_VERSION;
 }
 
 Handle<Value> JSN_Print(const Arguments& args) {
