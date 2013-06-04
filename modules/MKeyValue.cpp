@@ -131,11 +131,11 @@ v8::Handle<v8::Value> ParseKeyValue(const char *str){
 				auto arr = v8::Handle<v8::Array>::Cast(tree[depth]);
 				arr->Set(arr->Length(), resultString);
 			}
-		}else if(chr >= '0' && chr <= '9'){
+		}else if((chr >= '0' && chr <= '9') || chr == '-'){
 			int startIndex = i++;
 			for(; i < len; ++i){
 				chr = str[i];
-				if ((chr < '0' || chr > '9') && chr != '.' && chr != 'x') break;
+				if ((chr < '0' || chr > '9') && chr != '.') break;
 			}
 
 			char *tmp = new char[i - startIndex + 1];

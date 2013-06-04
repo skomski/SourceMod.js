@@ -70,6 +70,7 @@ void MGame::OnGameFrame(bool simulating){
 
 void MGame::OnThink(bool finalTick){
 	SMJS_Ping();
+	uv_run(uvLoop, UV_RUN_DEFAULT);
 	MSocket::OnThink(finalTick);
 }
 
@@ -356,6 +357,36 @@ FUNCTION_M(MGame::findEntitiesByClassname)
 	}
 
 	RETURN_SCOPED(arr);
+END
+
+FUNCTION_M(MGame::findEntityByTargetname)
+	CBaseEntity *pEntity = (CBaseEntity *)serverTools->FirstEntity();;
+	if (!pEntity) return v8::Null();
+
+	PSTR(searchname);
+
+	static int offset = -1;
+	if (offset == -1){
+		offset = gamehelpers->FindInDataMap(gamehelpers->GetDataMap(pEntity), "m_iName")->fieldOffset;
+	}
+
+	string_t s;
+
+
+	while (pEntity){
+		if ((s = *(string_t *)((uint8_t *)pEntity + offset)) == NULL_STRING){
+			pEntity = (CBaseEntity *)serverTools->NextEntity(pEntity);
+			continue;
+		}
+
+		if (strcasecmp(*searchname, STRING(s)) == 0){
+			RETURN_SCOPED(GetEntityWrapper(pEntity)->GetWrapper(GetPluginRunning()));
+		}
+
+		pEntity = (CBaseEntity *)serverTools->NextEntity(pEntity);
+	}
+
+	return v8::Null();
 END
 
 FUNCTION_M(MGame::getTime)

@@ -29,6 +29,7 @@ public:
 	FUNCTION_DECL(precacheModel);
 	FUNCTION_DECL(findEntityByClassname);
 	FUNCTION_DECL(findEntitiesByClassname);
+	FUNCTION_DECL(findEntityByTargetname);
 	FUNCTION_DECL(getTime);
 	FUNCTION_DECL(hookEvent);
 	FUNCTION_DECL(createEntity);
@@ -46,6 +47,7 @@ public:
 		WRAPPED_FUNC(precacheModel);
 		WRAPPED_FUNC(findEntityByClassname);
 		WRAPPED_FUNC(findEntitiesByClassname);
+		WRAPPED_FUNC(findEntityByTargetname);
 		WRAPPED_FUNC(getTime);
 		WRAPPED_FUNC(hookEvent);
 		WRAPPED_FUNC(createEntity);
