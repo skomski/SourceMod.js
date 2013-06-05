@@ -382,6 +382,8 @@ FUNCTION_M(MDota::findClearSpaceForUnit)
 END
 
 FUNCTION_M(MDota::setWaitForPlayersCount)
+	if(GetPluginRunning()->IsSandboxed()) THROW("This function is not allowed to be called in sandboxed plugins");	
+
 	PINT(c);
 
 	waitingForPlayersCount = c;
