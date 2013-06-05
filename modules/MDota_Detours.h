@@ -211,7 +211,7 @@ DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
 		mov		ebp, esp
 		sub		esp, 64
 
-		mov		client, esi
+		mov		client, eax
 	}
 
 	__asm pushad
@@ -224,7 +224,7 @@ DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
 		if(newHero == NULL){
 			__asm {
 				push	cmd
-				mov		esi, client
+				mov		eax, client
 				call	ClientPickHero_Actual
 			}
 		}else{
@@ -236,7 +236,7 @@ DETOUR_DECL_STATIC1_STDCALL_NAKED(ClientPickHero, void, CCommand*, cmd){
 
 			__asm {
 				push	tmp
-				mov		esi, client
+				mov		eax, client
 				call	ClientPickHero_Actual
 			}
 
