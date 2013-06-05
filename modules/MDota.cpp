@@ -401,6 +401,16 @@ FUNCTION_M(MDota::setWaitForPlayersCount)
 END
 
 FUNCTION_M(MDota::giveItemToHero)
+	static int offset = 0;
+	if(offset == 0){
+		sm_sendprop_info_t prop;
+		if(!SMJS_Netprops::GetClassPropInfo("CDOTA_BaseNPC", "m_Inventory", &prop)){
+			printf("Couldn't find m_Inventory in CDOTA_BaseNPC");
+			return;
+		}
+		offset = prop.actual_offset;
+	}
+	
 	PSTR(itemClsname);
 	POBJ(unit);
 
@@ -419,7 +429,7 @@ FUNCTION_M(MDota::giveItemToHero)
 		RETURN_SCOPED(v8::Boolean::New(false));
 	}
 
-	auto inventory = (CBaseEntity*)((intptr_t)ent->ent + 10240);
+	auto inventory = (CBaseEntity*)((intptr_t)ent->ent + offset);
 
 	int res;
 

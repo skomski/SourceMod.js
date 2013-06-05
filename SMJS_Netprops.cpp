@@ -138,6 +138,10 @@ bool SMJS_Netprops::GetEntityPropInfo(void *ent, const char *propName, sm_sendpr
 	return gamehelpers->FindSendPropInfo(pNet->GetServerClass()->GetName(), propName, propInfo);
 }
 
+bool SMJS_Netprops::GetClassPropInfo(const char *classname, const char *propName, sm_sendprop_info_t *propInfo){
+	return gamehelpers->FindSendPropInfo(classname, propName, propInfo);
+}
+
 v8::Handle<v8::Value> SMJS_Netprops::SGetNetProp(v8::Local<v8::String> prop, const v8::AccessorInfo &info){
 	SMJS_Netprops *self = (SMJS_Netprops*) Handle<External>::Cast(info.This()->GetInternalField(0))->Value();
 

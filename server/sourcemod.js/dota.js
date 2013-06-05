@@ -27,7 +27,7 @@ dota.DAMAGE_TYPE_PURE =       1 << 3;
 dota.DAMAGE_TYPE_HP_REMOVAL = 1 << 4;
 
 dota.setUnitWaypoint = function(unit, waypoint){
-	unit.setDataEnt(10036, waypoint);
+	unit.setDataEnt(0x2738, waypoint);
 }
 
 dota.setHeroLevel = function(hero, level){

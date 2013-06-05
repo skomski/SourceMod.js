@@ -48,6 +48,7 @@ public:
 	}
 
 	static bool GetEntityPropInfo(void *ent, const char *propName, sm_sendprop_info_t *propInfo);
+	static bool GetClassPropInfo(const char *classname, const char *propName, sm_sendprop_info_t *propInfo);
 
 protected:
 	v8::Persistent<v8::Value> GenerateThenFindCachedValue(PLUGIN_ID plId, std::string key, void *ent, edict_t *edict, SendProp *p, size_t offset);
