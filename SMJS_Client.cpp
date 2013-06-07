@@ -2,40 +2,11 @@
 #include "SMJS_Plugin.h"
 #include "game/shared/protobuf/usermessages.pb.h"
 
+#if SOURCE_ENGINE == SE_DOTA
+	#include "game/shared/dota/protobuf/dota_usermessages.pb.h"
+#endif
+
 WRAPPED_CLS_CPP(SMJS_Client, SMJS_Entity)
-
-class SingleRecipientFilter : public IRecipientFilter
-{
-public:
-	SingleRecipientFilter(int idx)
-	{
-		index = idx;
-	}
-
-	virtual bool IsReliable( void ) const __override
-	{
-		return true;
-	}
-
-	virtual bool IsInitMessage( void ) const __override
-	{
-		return false;
-	}
-
-	virtual int GetRecipientCount( void ) const __override
-	{
-		return 1;
-	}
-
-	virtual const int* GetRecipientIndex( int *clientIndex, int slot ) const __override
-	{
-		*clientIndex = reinterpret_cast<int>(gamehelpers->EdictOfIndex(index));
-		return &index;
-	}
-
-private:
-	int index;
-};
 
 SMJS_Client::SMJS_Client(edict_t *edict) : SMJS_Entity(NULL) {
 	this->edict = edict;
@@ -160,3 +131,19 @@ FUNCTION_M(SMJS_Client::changeTeam)
 
 	RETURN_UNDEF;
 END
+
+#if SOURCE_ENGINE == SE_DOTA
+
+FUNCTION_M(SMJS_Client::invalidCommand)
+	GET_INTERNAL(SMJS_Client*, self);
+	PSTR(str);
+	CDOTAUserMsg_InvalidCommand msg;
+	msg.set_message(*str);
+
+	SingleRecipientFilter filter(self->entIndex);
+	engine->SendUserMessage(filter, DOTA_UM_InvalidCommand, msg);
+
+	RETURN_UNDEF;
+END
+
+#endif

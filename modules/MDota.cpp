@@ -2,18 +2,46 @@
 #include "SMJS_Plugin.h"
 #include "modules/MEntities.h"
 #include "CDetour/detours.h"
+#include "SMJS_Client.h"
 #include "SMJS_Entity.h"
 #include "SMJS_VKeyValues.h"
 #include "sh_memory.h"
+#include "game/shared/protobuf/usermessages.pb.h"
+#include "game/shared/dota/protobuf/dota_usermessages.pb.h"
 
 #define WAIT_FOR_PLAYERS_COUNT_SIG "\x83\x3D****\x00\x7E\x19\x8B\x0D****\x83\x79\x30\x00"
 #define WAIT_FOR_PLAYERS_COUNT_SIG_LEN 19
+
+#define USE_NETPROP_OFFSET(varName, clsName, propName, retFail) static int varName = 0; \
+	if(varName == 0){ \
+		sm_sendprop_info_t prop; \
+		if(!SMJS_Netprops::GetClassPropInfo(#clsName, #propName, &prop)){ \
+			printf("Couldn't find " #clsName " in " #propName); \
+			RETURN_SCOPED(retFail); \
+		} \
+		varName = prop.actual_offset; \
+	}
+
+#define FIND_DOTA_PTR(name) \
+	if(!dotaConf->GetMemSig(#name, (void**) &name) || name == NULL){ \
+		smutils->LogError(myself, "Couldn't sigscan " #name); \
+	} else { \
+		name = *(void**)name; \
+	}
+	
+
+#define FIND_DOTA_FUNC(name) \
+	if(!dotaConf->GetMemSig(#name, (void**) &name) || name == NULL){ \
+		smutils->LogError(myself, "Couldn't sigscan " #name); \
+	} \
 
 WRAPPED_CLS_CPP(MDota, SMJS_Module);
 
 static IGameConfig *dotaConf = NULL;
 static void *LoadParticleFile;
 static void *CreateUnit;
+
+static void *GameManager;
 
 static int waitingForPlayersCount = 10;
 static int* waitingForPlayersCountPtr = NULL;
@@ -28,6 +56,7 @@ static void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
 static CBaseEntity* (*DCreateItem)(const char *item, void *unit, void *unit2);
 static int (__stdcall *DGiveItem)(CBaseEntity *inventory, int a4, int a5, char a6); // eax = 0, ecx = item
 static void (*DDestroyItem)(CBaseEntity *item);
+static int (__stdcall *StealAbility)(CBaseEntity *hero, CBaseEntity *newAbility, int slot, int somethingUsuallyZero);
 
 static void PatchVersionCheck();
 static void PatchWaitForPlayersCount();
@@ -94,32 +123,17 @@ MDota::MDota(){
 	
 	heroBuyItemDetour = DETOUR_CREATE_STATIC(HeroBuyItem, "HeroBuyItem");
 	if(heroBuyItemDetour) heroBuyItemDetour->EnableDetour();
+
+	FIND_DOTA_PTR(GameManager);
+
+	FIND_DOTA_FUNC(LoadParticleFile);
+	FIND_DOTA_FUNC(FindClearSpaceForUnit);
+	FIND_DOTA_FUNC(DCreateItem);
+	FIND_DOTA_FUNC(DGiveItem);
+	FIND_DOTA_FUNC(DDestroyItem);
+	FIND_DOTA_FUNC(StealAbility);
+
 	
-	
-
-	if(!dotaConf->GetMemSig("LoadParticleFile", &LoadParticleFile) || LoadParticleFile == NULL){
-		smutils->LogError(myself, "Couldn't sigscan LoadParticleFile");
-	}
-
-	if(!dotaConf->GetMemSig("CreateUnit", &CreateUnit) || CreateUnit == NULL){
-		smutils->LogError(myself, "Couldn't sigscan CreateUnit");
-	}
-
-	if(!dotaConf->GetMemSig("FindClearSpaceForUnit", (void**) &FindClearSpaceForUnit) || FindClearSpaceForUnit == NULL){
-		smutils->LogError(myself, "Couldn't sigscan FindClearSpaceForUnit");
-	}
-	
-	if(!dotaConf->GetMemSig("DCreateItem", (void**) &DCreateItem) || DCreateItem == NULL){
-		smutils->LogError(myself, "Couldn't sigscan DCreateItem");
-	}
-
-	if(!dotaConf->GetMemSig("DGiveItem", (void**) &DGiveItem) || DGiveItem == NULL){
-		smutils->LogError(myself, "Couldn't sigscan DGiveItem");
-	}
-
-	if(!dotaConf->GetMemSig("DDestroyItem", (void**) &DDestroyItem) || DDestroyItem == NULL){
-		smutils->LogError(myself, "Couldn't sigscan DDestroyItem");
-	}
 
 	expRequiredForLevel = (int*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), "\x00\x00\x00\x00\xC8\x00\x00\x00\xF4\x01\x00\x00\x84\x03\x00\x00\x78\x05\x00\x00", 20);
 	if(expRequiredForLevel == NULL){
@@ -401,16 +415,8 @@ FUNCTION_M(MDota::setWaitForPlayersCount)
 END
 
 FUNCTION_M(MDota::giveItemToHero)
-	static int offset = 0;
-	if(offset == 0){
-		sm_sendprop_info_t prop;
-		if(!SMJS_Netprops::GetClassPropInfo("CDOTA_BaseNPC", "m_Inventory", &prop)){
-			printf("Couldn't find m_Inventory in CDOTA_BaseNPC");
-			return;
-		}
-		offset = prop.actual_offset;
-	}
-	
+	USE_NETPROP_OFFSET(offset, CDOTA_BaseNPC, m_Inventory, v8::Boolean::New(false));
+
 	PSTR(itemClsname);
 	POBJ(unit);
 
@@ -476,5 +482,48 @@ FUNCTION_M(MDota::setTotalExpRequiredForLevel)
 
 	expRequiredForLevel[level - 1] = exp;
 
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(MDota::sendStatPopup)
+	USE_NETPROP_OFFSET(offset, CDOTAPlayer, m_iPlayerID, v8::Boolean::New(false));
+	
+	POBJ(targetObj);
+
+	auto target = dynamic_cast<SMJS_Client*>((SMJS_Base*) v8::Handle<v8::External>::Cast(targetObj->GetInternalField(0))->Value());
+	if(target == NULL) THROW("Invalid target");
+
+
+	PINT(type);
+	if(args.Length() < 3) THROW("Argument 3 must be an array of strings");
+	POBJ(tmpObj);
+	if(!tmpObj->IsArray()) THROW("Argument 3 must be an array of strings");
+
+	auto arr = v8::Handle<v8::Array>::Cast(tmpObj);
+
+	CDOTAUserMsg_SendStatPopup msg;
+	msg.set_player_id(*(int*)((intptr_t) target + offset));
+
+	for(uint32_t i = 0, len = arr->Length(); i < len; ++i){
+		v8::String::Utf8Value str(arr->Get(i));
+		msg.mutable_statpopup()->add_stat_strings(*str, str.length());
+	}
+
+	SingleRecipientFilter filter(target->entIndex);
+	engine->SendUserMessage(filter, DOTA_UM_SendStatPopup, msg);
+	
+	RETURN_SCOPED(v8::Boolean::New(true));
+END
+
+FUNCTION_M(MDota::setHeroAvailable)
+	USE_NETPROP_OFFSET(stableOffset, CDOTAGameManagerProxy, m_StableHeroAvailable, v8::Undefined());
+	USE_NETPROP_OFFSET(currentOffset, CDOTAGameManagerProxy, m_CurrentHeroAvailable, v8::Undefined());
+	USE_NETPROP_OFFSET(culledOffset, CDOTAGameManagerProxy, m_CulledHeroes, v8::Undefined());
+	
+	PINT(hero);
+	PBOL(available);
+	*(bool*)((intptr_t) GameManager + stableOffset + hero) = available;
+	*(bool*)((intptr_t) GameManager + currentOffset + hero) = available;
+	*(bool*)((intptr_t) GameManager + culledOffset + hero) = available;
 	RETURN_UNDEF;
 END

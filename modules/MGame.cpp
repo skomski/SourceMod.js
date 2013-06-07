@@ -43,7 +43,7 @@ MGame::MGame(){
 
 void MGame::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
 	auto obj = wrapper->ToObject();
-	
+
 	obj->Set(v8::String::New("rules"), rules.GetWrapper(plugin));
 }
 
@@ -56,6 +56,9 @@ void MGame::OnServerActivate(){
 
 	self->rules.rulesProps.proxy = FindEntityByClassname(-1, "dota_gamerules");
 	self->rules.rulesProps.gamerules = sdkTools->GetGameRules();
+	if(self->rules.rulesProps.gamerules == NULL){
+		printf("Could not find game rules!\n");
+	}
 
 	self->CallGlobalFunction("OnMapStart");
 }
@@ -426,6 +429,17 @@ FUNCTION_M(MGame::createEntity)
 	CBaseEntity *pEntity = (CBaseEntity *) serverTools->CreateEntityByName(*name);
 	if(pEntity == NULL) RETURN_SCOPED(v8::Null());
 	RETURN_SCOPED(GetEntityWrapper(pEntity)->GetWrapper(GetPluginRunning()));
+END
+
+FUNCTION_M(MGame::getPropOffset)
+	PSTR(serverCls);
+	PSTR(propName);
+	sm_sendprop_info_t prop;
+	if(SMJS_Netprops::GetClassPropInfo(*serverCls, *propName, &prop)){
+		RETURN_INT(prop.actual_offset);
+	}
+
+	RETURN_INT(-1);
 END
 
 void pauseGame(){

@@ -131,6 +131,8 @@ public:
 	FUNCTION_DECL(giveItemToHero);
 	FUNCTION_DECL(getTotalExpRequiredForLevel);
 	FUNCTION_DECL(setTotalExpRequiredForLevel);
+	FUNCTION_DECL(sendStatPopup);
+	FUNCTION_DECL(setHeroAvailable);
 	
 
 	WRAPPED_CLS(MDota, SMJS_Module) {
@@ -145,6 +147,8 @@ public:
 		WRAPPED_FUNC(giveItemToHero);
 		WRAPPED_FUNC(getTotalExpRequiredForLevel);
 		WRAPPED_FUNC(setTotalExpRequiredForLevel);
+		WRAPPED_FUNC(sendStatPopup);
+		WRAPPED_FUNC(setHeroAvailable);
 
 #define HERO_ID_CONST(name, value) proto->Set(v8::String::New("HERO_" #name), v8::Int32::New(Hero_##value), v8::ReadOnly);
 		

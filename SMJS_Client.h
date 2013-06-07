@@ -4,6 +4,7 @@
 #include "SMJS.h"
 #include "SMJS_BaseWrapped.h"
 #include "SMJS_Entity.h"
+#include "irecipientfilter.h"
 
 class SMJS_Client : public SMJS_Entity {
 public:
@@ -31,6 +32,12 @@ public:
 	FUNCTION_DECL(kick);
 	FUNCTION_DECL(changeTeam);
 
+#if SOURCE_ENGINE == SE_DOTA
+	// Dota specific
+	FUNCTION_DECL(invalidCommand);
+#endif
+	
+
 	WRAPPED_CLS(SMJS_Client, SMJS_Entity) {
 		temp->SetClassName(v8::String::NewSymbol("Client"));
 		WRAPPED_FUNC(getName);
@@ -44,10 +51,42 @@ public:
 		WRAPPED_FUNC(getAuthString);
 		WRAPPED_FUNC(kick);
 		WRAPPED_FUNC(changeTeam);
+
+#if SOURCE_ENGINE == SE_DOTA
+			// Dota specific
+			WRAPPED_FUNC(invalidCommand);
+#endif
 	}
 
 private:
 	SMJS_Client();
+};
+
+class SingleRecipientFilter : public IRecipientFilter {
+public:
+	SingleRecipientFilter(int idx){
+		index = idx;
+	}
+
+	virtual bool IsReliable( void ) const __override{
+		return true;
+	}
+
+	virtual bool IsInitMessage( void ) const __override{
+		return false;
+	}
+
+	virtual int GetRecipientCount( void ) const __override{
+		return 1;
+	}
+
+	virtual const int* GetRecipientIndex(char *unknown, int slot) const __override{
+		//*client = gamehelpers->EdictOfIndex(index);
+		return &index;
+	}
+
+private:
+	int index;
 };
 
 #endif

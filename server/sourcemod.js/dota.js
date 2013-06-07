@@ -15,10 +15,10 @@ dota.STATE_DISCONNECT = 7;
 
 dota.TEAM_NONE = 0;
 dota.TEAM_SPEC = 1;
-dota.TEAM_RADI = 2;
+dota.TEAM_RADIANT = 2;
 dota.TEAM_DIRE = 3;
 dota.TEAM_NEUTRAL = 4;
-dota.TEAM_RADIANT = 2;
+
 
 dota.DAMAGE_TYPE_PHYSICAL =   1 << 0;
 dota.DAMAGE_TYPE_MAGICAL =    1 << 1;
@@ -26,8 +26,37 @@ dota.DAMAGE_TYPE_COMPOSITE =  1 << 2;
 dota.DAMAGE_TYPE_PURE =       1 << 3;
 dota.DAMAGE_TYPE_HP_REMOVAL = 1 << 4;
 
+dota.UNIT_CAP_NO_ATTACK = 0;
+dota.UNIT_CAP_MELEE_ATTACK = 1;
+dota.UNIT_CAP_RANGED_ATTACK = 2;
+
+dota.UNIT_CAP_MOVE_NONE = 0;
+dota.UNIT_CAP_MOVE_GROUND = 1;
+dota.UNIT_CAP_MOVE_FLY = 2;
+
+dota.COMBAT_CLASS_ATTACK_LIGHT = 0;
+dota.COMBAT_CLASS_ATTACK_HERO = 1;
+dota.COMBAT_CLASS_ATTACK_BASIC = 2;
+dota.COMBAT_CLASS_ATTACK_PIERCE = 3;
+dota.COMBAT_CLASS_ATTACK_SIEGE = 4;
+
+dota.COMBAT_CLASS_DEFEND_WEAK = 0;
+dota.COMBAT_CLASS_DEFEND_BASIC = 1;
+dota.COMBAT_CLASS_DEFEND_STRONG = 2;
+dota.COMBAT_CLASS_DEFEND_STRUCTURE = 3;
+dota.COMBAT_CLASS_DEFEND_HERO = 4;
+dota.COMBAT_CLASS_DEFEND_SOFT = 5;
+
+// The actual offset is around 0x2738, but it may change, so we store it as a relative
+// offset from the closest prop we know
+
+var waypointOffset = game.getPropOffset("CDOTA_BaseNPC", "m_iDamageBonus") + 0x0014;
 dota.setUnitWaypoint = function(unit, waypoint){
-	unit.setDataEnt(0x2738, waypoint);
+	unit.setDataEnt(waypointOffset, waypoint);
+}
+var moveCapabilitiesOffset = game.getPropOffset("CDOTA_BaseNPC", "m_iAttackCapabilities") + 0x0004;
+dota.setMoveCapabilities = function(unit, cap){
+	unit.setData(moveCapabilitiesOffset, 4, cap);
 }
 
 dota.setHeroLevel = function(hero, level){
