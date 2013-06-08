@@ -127,6 +127,7 @@ MDota::MDota(){
 	FIND_DOTA_PTR(GameManager);
 
 	FIND_DOTA_FUNC(LoadParticleFile);
+	FIND_DOTA_FUNC(CreateUnit);
 	FIND_DOTA_FUNC(FindClearSpaceForUnit);
 	FIND_DOTA_FUNC(DCreateItem);
 	FIND_DOTA_FUNC(DGiveItem);

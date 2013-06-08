@@ -47,13 +47,14 @@ dota.COMBAT_CLASS_DEFEND_STRUCTURE = 3;
 dota.COMBAT_CLASS_DEFEND_HERO = 4;
 dota.COMBAT_CLASS_DEFEND_SOFT = 5;
 
-// The actual offset is around 0x2738, but it may change, so we store it as a relative
+// The actual offset is around 0x2770, but it may change, so we store it as a relative
 // offset from the closest prop we know
 
 var waypointOffset = game.getPropOffset("CDOTA_BaseNPC", "m_iDamageBonus") + 0x0014;
 dota.setUnitWaypoint = function(unit, waypoint){
 	unit.setDataEnt(waypointOffset, waypoint);
 }
+
 var moveCapabilitiesOffset = game.getPropOffset("CDOTA_BaseNPC", "m_iAttackCapabilities") + 0x0004;
 dota.setMoveCapabilities = function(unit, cap){
 	unit.setData(moveCapabilitiesOffset, 4, cap);
