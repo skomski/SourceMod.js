@@ -19,7 +19,6 @@ v8::ScriptData *scriptDotaData;
 
 static void SMJS_OnPausedTick();
 static void OnMessage(Handle<Message> message, Handle<Value> error);
-static char* FileToString(const char *file, const char* dir);
 
 void checkerThreadFunc(void*);
 
@@ -32,7 +31,7 @@ void SMJS_Init(){
 	char smjsPath[512];
 	smutils->BuildPath(Path_SM, smjsPath, sizeof(smjsPath), "sourcemod.js");
 
-	scriptDotaStr = FileToString("dota.js", smjsPath);
+	scriptDotaStr = SMJS_FileToString("dota.js", smjsPath);
 	if(scriptDotaStr == NULL){
 		printf("File \"dota.js\" missing\n");
 		getchar();
@@ -203,7 +202,7 @@ void SMJS_OnPausedTick(){
 	MSocket::Process();
 }
 
-char* FileToString(const char* file, const char* dir){
+char* SMJS_FileToString(const char* file, const char* dir){
 	char path[512];
 	if(dir != NULL){
 #if WIN32

@@ -32,7 +32,7 @@
 #include <conio.h>
 #include "extension.h"
 #include "dirent.h"
-
+      
 #include "sh_memory.h"
 
 #include "modules/MPlugin.h"
@@ -45,6 +45,7 @@
 #include "modules/MKeyValue.h"
 #include "modules/MDota.h"
 #include "modules/MEngine.h"
+#include "modules/MFileSystem.h"
 #include "metamod.h"
 #include "SMJS_Interfaces.h"
 
@@ -78,8 +79,6 @@ bool SMJS::SDK_OnLoad(char *error, size_t maxlength, bool late){
 
 	if(!SMJS_LoadConfs(error, maxlength, late)) return false;
 
-	
-
 	v8::V8::Initialize();
 	SMJS_Init();
 
@@ -98,6 +97,7 @@ bool SMJS::SDK_OnLoad(char *error, size_t maxlength, bool late){
 	SMJS_AddModule(new MGame());
 	SMJS_AddModule(new MSocket());
 	SMJS_AddModule(new MKeyValue());
+	SMJS_AddModule(new MFileSystem());
 	SMJS_AddModule(new MDota());
 
 	return true;

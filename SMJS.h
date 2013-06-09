@@ -40,6 +40,8 @@ void SMJS_Ping();
 void SMJS_Pause();
 void SMJS_Resume();
 
+char* SMJS_FileToString(const char *file, const char* dir = NULL);
+
 extern v8::Isolate *mainIsolate;
 
 extern const char *scriptDotaStr;
