@@ -442,6 +442,18 @@ FUNCTION_M(MGame::getPropOffset)
 	RETURN_INT(-1);
 END
 
+FUNCTION_M(MGame::getEntityByIndex)
+	PINT(index);
+	
+	auto edict = gamehelpers->EdictOfIndex(index);
+	if(edict == NULL) RETURN_SCOPED(v8::Null());
+	
+	auto ent = edict->GetNetworkable()->GetBaseEntity();
+	if(ent == NULL) RETURN_SCOPED(v8::Null());
+
+	RETURN_SCOPED(GetEntityWrapper(ent)->GetWrapper(GetPluginRunning()));
+END
+
 void pauseGame(){
 	SMJS_Pause();
 	v8::V8::RemoveCallCompletedCallback(pauseGame);

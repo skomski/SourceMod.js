@@ -354,9 +354,7 @@ FUNCTION_M(SMJS_Entity::teleport)
 		}
 	}
 	
-	PNUM(x);
-	PNUM(y);
-	PNUM(z);
+	PVEC(x, y, z);
 
 	unsigned char vstk[sizeof(void *) * 4];
 	unsigned char *vptr = vstk;

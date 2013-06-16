@@ -34,6 +34,7 @@ public:
 	FUNCTION_DECL(hookEvent);
 	FUNCTION_DECL(createEntity);
 	FUNCTION_DECL(getPropOffset);
+	FUNCTION_DECL(getEntityByIndex);
 
 	FUNCTION_DECL(pause);
 	FUNCTION_DECL(resume);
@@ -53,7 +54,7 @@ public:
 		WRAPPED_FUNC(hookEvent);
 		WRAPPED_FUNC(createEntity);
 		WRAPPED_FUNC(getPropOffset);
-
+		WRAPPED_FUNC(getEntityByIndex);
 
 		WRAPPED_FUNC(pause);
 		WRAPPED_FUNC(resume);

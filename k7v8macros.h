@@ -88,6 +88,10 @@ using namespace v8;
 	THROW_VERB("Argument %i of %s, must be an number\n",_argn,FUN_NAME);} \
 	double n=(args[_argn-1]->NumberValue()); 0
 
+#define PNUM2(n)             0; if (args.Length()<++_argn || !args[_argn-1]->IsNumber()) {\
+	THROW_VERB("Argument %i of %s, must be an number\n",_argn,FUN_NAME);} \
+	n=(args[_argn-1]->NumberValue()); 0
+
 
 #define PSTR(n)             0; if (args.Length()<++_argn) {\
 	THROW_VERB("Argument %i of %s must be a string\n",_argn,FUN_NAME);} \
@@ -103,7 +107,7 @@ using namespace v8;
 
 #define POBJ_NULLABLE(n)             0; if (args.Length()<++_argn || (!args[_argn-1]->IsObject() && !args[_argn-1]->IsNull())) {\
 	THROW_VERB("Argument %i of %s, must be an object\n",_argn,FUN_NAME);} \
-	v8::Handle<v8::Object> n (args[_argn-1]->ToObject()); 0
+	v8::Handle<v8::Object> n; if(!args[_argn-1]->IsNull()) n = args[_argn-1]->ToObject(); 0
 
 #define PFUN(n)             0; if (args.Length()<++_argn || !args[_argn-1]->IsFunction()) {\
 	THROW_VERB("Argument %i of %s, must be a function\n",_argn,FUN_NAME);} \
@@ -113,6 +117,38 @@ using namespace v8;
 	THROW_VERB("Argument %i of %s, must be an external\n",_argn,FUN_NAME);} \
 	type var = dynamic_cast<type>((SMJS_Base*)v8::External::Cast(*args[_argn-1])->Value()); \
 	if(notNull && var == NULL) THROW_VERB("Argument %i is of an invalid type\n",_argn,FUN_NAME);
+
+#define PVEC_N(vec, n) v8::Handle<v8::Value> vec_tmp_##n = vec->Get(v8::String::NewSymbol(#n)); \
+	if(vec_tmp_##n.IsEmpty() || !vec_tmp_##n->IsNumber()) THROW("Field " #n " in a vector must be a number"); \
+	n = vec_tmp_##n->NumberValue();
+
+#define PVEC(x, y, z) 0  ;if (args.Length()<=_argn) THROW_VERB("Argument %i of %s, must be a vector \n",_argn+1,FUN_NAME); \
+	double x, y, z; \
+	if(args[_argn]->IsNumber()) { \
+		PNUM2(x); \
+		PNUM2(y); \
+		PNUM2(z); \
+	}else{ \
+		POBJ(vec_##x##y##z); \
+		PVEC_N(vec_##x##y##z, x); \
+		PVEC_N(vec_##x##y##z, y); \
+		PVEC_N(vec_##x##y##z, z); \
+	}
+
+#define PENT(ent) 0; \
+	POBJ_NULLABLE(ent##_tmp); \
+	SMJS_Entity *ent = NULL; \
+	if(!ent##_tmp.IsEmpty()){ \
+		 \
+		auto ent##_inte = ent##_tmp->GetInternalField(0); \
+		if(ent##_inte.IsEmpty()){ \
+			THROW("Invalid entity"); \
+		} \
+		 \
+		ent = dynamic_cast<SMJS_Entity*>((SMJS_Base*) v8::Handle<v8::External>::Cast(ent##_inte)->Value()); \
+		if(ent == NULL) THROW("Invalid other entity"); \
+	}
+	
 
 // ----------------------------------------------------------------------------
 //

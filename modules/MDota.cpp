@@ -57,6 +57,9 @@ static CBaseEntity* (*DCreateItem)(const char *item, void *unit, void *unit2);
 static int (__stdcall *DGiveItem)(CBaseEntity *inventory, int a4, int a5, char a6); // eax = 0, ecx = item
 static void (*DDestroyItem)(CBaseEntity *item);
 static int (__stdcall *StealAbility)(CBaseEntity *hero, CBaseEntity *newAbility, int slot, int somethingUsuallyZero);
+static CBaseEntity* (*DCreateItemDrop)(Vector location);
+static void **DLinkItemDrop;
+
 
 static void PatchVersionCheck();
 static void PatchWaitForPlayersCount();
@@ -133,8 +136,8 @@ MDota::MDota(){
 	FIND_DOTA_FUNC(DGiveItem);
 	FIND_DOTA_FUNC(DDestroyItem);
 	FIND_DOTA_FUNC(StealAbility);
-
-	
+	FIND_DOTA_FUNC(DCreateItemDrop);
+	FIND_DOTA_FUNC(DLinkItemDrop);
 
 	expRequiredForLevel = (int*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), "\x00\x00\x00\x00\xC8\x00\x00\x00\xF4\x01\x00\x00\x84\x03\x00\x00\x78\x05\x00\x00", 20);
 	if(expRequiredForLevel == NULL){
@@ -378,9 +381,7 @@ END
 
 FUNCTION_M(MDota::findClearSpaceForUnit)
 	POBJ(otherTmp);
-	PNUM(x);
-	PNUM(y);
-	PNUM(z);
+	PVEC(x, y, z);
 
 	CBaseEntity *targetEntity;
 	auto inte = otherTmp->GetInternalField(0);
@@ -416,24 +417,18 @@ FUNCTION_M(MDota::setWaitForPlayersCount)
 END
 
 FUNCTION_M(MDota::giveItemToHero)
-	USE_NETPROP_OFFSET(offset, CDOTA_BaseNPC, m_Inventory, v8::Boolean::New(false));
+	USE_NETPROP_OFFSET(offset, CDOTA_BaseNPC, m_Inventory, v8::Null());
 
 	PSTR(itemClsname);
 	POBJ(unit);
-
-	SMJS_Entity *ent;
-
-	auto inte = unit->GetInternalField(0);
-	if(inte.IsEmpty()){
-		THROW("Invalid other entity");
+	PENT(ent);
+	if(ent == NULL){
+		THROW("Must provide a valid hero");
 	}
 
-	ent = dynamic_cast<SMJS_Entity*>((SMJS_Base*) v8::Handle<v8::External>::Cast(inte)->Value());
-	if(ent == NULL) THROW("Invalid other entity");
-	
 	auto item = DCreateItem(*itemClsname, ent->ent, ent->ent);
 	if(item == NULL){
-		RETURN_SCOPED(v8::Boolean::New(false));
+		RETURN_SCOPED(v8::Null());
 	}
 
 	auto inventory = (CBaseEntity*)((intptr_t)ent->ent + offset);
@@ -453,10 +448,10 @@ FUNCTION_M(MDota::giveItemToHero)
 
 	if(res != -1) {
 		DDestroyItem(item);
-		RETURN_SCOPED(v8::Boolean::New(false));
+		RETURN_SCOPED(v8::Null());
 	}
 
-	RETURN_SCOPED(v8::Boolean::New(true));
+	RETURN_SCOPED(GetEntityWrapper(item)->GetWrapper(GetPluginRunning()));
 END
 
 
@@ -527,4 +522,37 @@ FUNCTION_M(MDota::setHeroAvailable)
 	*(bool*)((intptr_t) GameManager + currentOffset + hero) = available;
 	*(bool*)((intptr_t) GameManager + culledOffset + hero) = available;
 	RETURN_UNDEF;
+END
+
+FUNCTION_M(MDota::createItemDrop)
+	PENT(owner);
+	PSTR(itemName);
+	PVEC(x, y, z);
+
+	CBaseEntity *pEntity;
+
+	if(owner == NULL){
+		THROW("Item must have an owner");
+	}else{
+		pEntity = owner->ent;
+	}
+
+	auto item = DCreateItem(*itemName, NULL, pEntity);
+	if(item == NULL){
+		RETURN_SCOPED(v8::Null());
+	}
+
+	auto drop = DCreateItemDrop(Vector(x, y, z));
+	if(drop == NULL){
+		DDestroyItem(item);
+		RETURN_SCOPED(v8::Null());
+	}
+
+	__asm {
+		mov			eax, item
+		push		drop
+		call		DLinkItemDrop
+	}
+
+	RETURN_SCOPED(GetEntityWrapper(drop)->GetWrapper(GetPluginRunning()));
 END

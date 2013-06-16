@@ -110,6 +110,26 @@
 			
 			
 			/*
+				CBaseEntity* __cdecl CreateItemDrop(Vector location);
+				
+				"item_halloween_candy_corn"
+			*/
+			"DCreateItemDrop"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x81\xEC\x9C\x00\x00\x00\x53\x56\x33\xF6\x57\x8D\x44\x24\x10\x89\x74\x24\x18\xE8"
+			}
+			
+			/*
+				int __userpurge LinkItemDrop<eax>(CBaseEntity *item<eax>, CBaseEntity *drop);
+			*/
+			"DLinkItemDrop"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x0C\x53\x56\x8B\x75\x08\x57\x8B\xF8\x85\xFF\x74"
+			}
+			
+			/*
 				Found in HasModifier, or any function that calls FindFactory
 			*/
 			"CModifierFactoryDictionaryPointer"

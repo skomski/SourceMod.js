@@ -133,7 +133,7 @@ public:
 	FUNCTION_DECL(setTotalExpRequiredForLevel);
 	FUNCTION_DECL(sendStatPopup);
 	FUNCTION_DECL(setHeroAvailable);
-	
+	FUNCTION_DECL(createItemDrop);
 
 	WRAPPED_CLS(MDota, SMJS_Module) {
 		temp->SetClassName(v8::String::NewSymbol("DotaModule"));
@@ -149,6 +149,7 @@ public:
 		WRAPPED_FUNC(setTotalExpRequiredForLevel);
 		WRAPPED_FUNC(sendStatPopup);
 		WRAPPED_FUNC(setHeroAvailable);
+		WRAPPED_FUNC(createItemDrop);
 
 #define HERO_ID_CONST(name, value) proto->Set(v8::String::New("HERO_" #name), v8::Int32::New(Hero_##value), v8::ReadOnly);
 		
