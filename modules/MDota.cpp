@@ -393,7 +393,7 @@ END
 FUNCTION_M(MDota::forceWin)
 	PINT(team);
 	if(team != 2 && team != 3) THROW_VERB("Invalid team %d", team);
-
+	
 	//FIXME
 	auto cmd = icvar->FindCommand("dota_kill_buildings");
 	cmd->RemoveFlags(FCVAR_CHEAT);
