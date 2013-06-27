@@ -64,39 +64,39 @@ dota.COMBAT_CLASS_DEFEND_SOFT = 5;
 // 24 flying and flying vision
 // 30 makes the unity not give vision
 /// Unit can still turn around and attack
-dota.UNIT_STATE_ROOTED =		1 <<  0;
-dota.UNIT_STATE_SILENCED =		1 <<  4;
+dota.UNIT_STATE_ROOTED =          1 <<  0;
+dota.UNIT_STATE_SILENCED =        1 <<  4;
 /// Does not send an error if the player tries to act, just queues the action for when
 /// this state is removed
-dota.UNIT_STATE_CANT_ACT =		1 <<  6;
-dota.UNIT_STATE_INVISIBLE =		1 <<  8;
-dota.UNIT_STATE_INVULNERABLE =	1 <<  9;
-dota.UNIT_STATE_MAGIC_IMMUNE =	1 << 10;
+dota.UNIT_STATE_CANT_ACT =        1 <<  6;
+dota.UNIT_STATE_INVISIBLE =       1 <<  8;
+dota.UNIT_STATE_INVULNERABLE =    1 <<  9;
+dota.UNIT_STATE_MAGIC_IMMUNE =    1 << 10;
 /// Sends an error if the player tries to act
-dota.UNIT_STATE_CANT_ACT2 =		1 << 19;
-dota.UNIT_STATE_DOMINATED =		1 << 29;
+dota.UNIT_STATE_CANT_ACT2 =       1 << 19;
+dota.UNIT_STATE_DOMINATED =       1 << 29;
 
 /////////////// Unit target flags ///////////////
 
-dota.UNIT_TARGET_FLAG_RANGED =					1 <<  1;
-dota.UNIT_TARGET_FLAG_NOT_RANGED =				1 <<  2;
-dota.UNIT_TARGET_FLAG_DEAD =					1 <<  3;
-dota.UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES =	1 <<  4;
-dota.UNIT_TARGET_FLAG_NOT_MAGIC_IMMUNE_ALLIES =	1 <<  5;
-dota.UNIT_TARGET_FLAG_INVULNERABLE =			1 <<  6;
-dota.UNIT_TARGET_FLAG_FOW_VISIBLE =				1 <<  7;
-dota.UNIT_TARGET_FLAG_VISIBLE =					1 <<  8;
-dota.UNIT_TARGET_FLAG_NOT_ANCIENTS =			1 <<  9;
-dota.UNIT_TARGET_FLAG_CONTROLLABLE_BY_PLAYERS =	1 << 10;
-dota.UNIT_TARGET_FLAG_NOT_DOMINATED =			1 << 11;
-dota.UNIT_TARGET_FLAG_NOT_SUMMONED =			1 << 12;
-dota.UNIT_TARGET_FLAG_NOT_ILLUSIONS =			1 << 13;
-dota.UNIT_TARGET_FLAG_ETHEREAL =				1 << 14;
-dota.UNIT_TARGET_FLAG_HAS_MANA =				1 << 15;
-//dota.UNIT_TARGET_FLAG_ =						1 << 16;
-dota.UNIT_TARGET_FLAG_NOT_CREEP_HERO =			1 << 17;
-//dota.UNIT_TARGET_ =							1 << 18; // filters only passes if: (has this flag || does not have unit flag 31)
-//dota.UNIT_TARGET_ =							1 << 19; // has unit state 12
+dota.UNIT_TARGET_FLAG_RANGED =                    1 <<  1;
+dota.UNIT_TARGET_FLAG_NOT_RANGED =                1 <<  2;
+dota.UNIT_TARGET_FLAG_DEAD =                      1 <<  3;
+dota.UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES =      1 <<  4;
+dota.UNIT_TARGET_FLAG_NOT_MAGIC_IMMUNE_ALLIES =   1 <<  5;
+dota.UNIT_TARGET_FLAG_INVULNERABLE =              1 <<  6;
+dota.UNIT_TARGET_FLAG_FOW_VISIBLE =               1 <<  7;
+dota.UNIT_TARGET_FLAG_VISIBLE =                   1 <<  8;
+dota.UNIT_TARGET_FLAG_NOT_ANCIENTS =              1 <<  9;
+dota.UNIT_TARGET_FLAG_CONTROLLABLE_BY_PLAYERS =   1 << 10;
+dota.UNIT_TARGET_FLAG_NOT_DOMINATED =             1 << 11;
+dota.UNIT_TARGET_FLAG_NOT_SUMMONED =              1 << 12;
+dota.UNIT_TARGET_FLAG_NOT_ILLUSIONS =             1 << 13;
+dota.UNIT_TARGET_FLAG_ETHEREAL =                  1 << 14;
+dota.UNIT_TARGET_FLAG_HAS_MANA =                  1 << 15;
+//dota.UNIT_TARGET_FLAG_ =                        1 << 16;
+dota.UNIT_TARGET_FLAG_NOT_CREEP_HERO =            1 << 17;
+//dota.UNIT_TARGET_FLAG =\                        1 << 18; // filters only passes if: (has this flag || does not have unit flag 31)
+//dota.UNIT_TARGET_FLAG =                         1 << 19; // has unit state 12
 
 // The actual offset is around 0x2770, but it may change, so we store it as a relative
 // offset from the closest prop we know
