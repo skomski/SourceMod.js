@@ -143,6 +143,9 @@
     <ClCompile Include="..\modules\MFileSystem.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\engine\protobuf\networkbasetypes.pb.cc">
+      <Filter>Dota</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extension.h">
@@ -295,5 +298,22 @@
     <ClInclude Include="..\modules\MFileSystem.h">
       <Filter>Modules</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\engine\protobuf\networkbasetypes.pb.h">
+      <Filter>Dota</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\hl2sdk-dota\public\engine\protobuf\networkbasetypes.proto">
+      <Filter>Dota</Filter>
+    </None>
+    <None Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessages.proto">
+      <Filter>Dota</Filter>
+    </None>
+    <None Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_commonmessages.proto">
+      <Filter>Dota</Filter>
+    </None>
+    <None Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessages.proto">
+      <Filter>Dota</Filter>
+    </None>
   </ItemGroup>
 </Project>

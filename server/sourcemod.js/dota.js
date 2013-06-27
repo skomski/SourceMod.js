@@ -49,10 +49,12 @@ dota.COMBAT_CLASS_DEFEND_SOFT = 5;
 
 // The actual offset is around 0x2770, but it may change, so we store it as a relative
 // offset from the closest prop we know
+// This is found in the dota scripted spawner functions
 
 var waypointOffset = game.getPropOffset("CDOTA_BaseNPC", "m_iDamageBonus") + 0x0014;
 dota.setUnitWaypoint = function(unit, waypoint){
 	unit.setDataEnt(waypointOffset, waypoint);
+	dota._unitInvade(unit);
 }
 
 var moveCapabilitiesOffset = game.getPropOffset("CDOTA_BaseNPC", "m_iAttackCapabilities") + 0x0004;
@@ -62,19 +64,29 @@ dota.setMoveCapabilities = function(unit, cap){
 
 dota.setHeroLevel = function(hero, level){
 	var levelDiff = level - hero.netprops.m_iCurrentLevel;
+	if(levelDiff == 0) return;
 	
-	if(levelDiff != 0){
-		hero.netprops.m_iCurrentLevel = level;
-		hero.netprops.m_flStrength += hero.datamaps.m_flStrengthGain * levelDiff;
-		hero.netprops.m_flAgility += hero.datamaps.m_flAgilityGain * levelDiff;
-		hero.netprops.m_flIntellect += hero.datamaps.m_flIntellectGain * levelDiff;
+	if(levelDiff > 0){
+		for(var i = 0; i < levelDiff; ++i){
+			dota.levelUpHero(hero, i == 0 /* playEffects only once */);
+		}
+	}else{
+		// Deleveling a hero
+		// This may be really buggy
 		
-		hero.netprops.m_iAbilityPoints = Math.max(0, hero.netprops.m_iAbilityPoints + levelDiff);
-	}
-	
-	var expRequired = dota.getTotalExpRequiredForLevel(level);
-	if(hero.netprops.m_iCurrentXP < expRequired){
-		hero.netprops.m_iCurrentXP = expRequired;
+		if(levelDiff != 0){
+			hero.netprops.m_iCurrentLevel = level;
+			hero.netprops.m_flStrength += hero.netprops.m_flStrengthGain * levelDiff;
+			hero.netprops.m_flAgility += hero.netprops.m_flAgilityGain * levelDiff;
+			hero.netprops.m_flIntellect += hero.netprops.m_flIntellectGain * levelDiff;
+			
+			hero.netprops.m_iAbilityPoints = Math.max(0, hero.netprops.m_iAbilityPoints + levelDiff);
+		}
+		
+		var expRequired = dota.getTotalExpRequiredForLevel(level);
+		if(hero.netprops.m_iCurrentXP < expRequired){
+			hero.netprops.m_iCurrentXP = expRequired;
+		}
 	}
 }
 
@@ -109,21 +121,30 @@ Client.prototype.getHeroes = function(){
 	}
 	
 	if(this._isMeepo){
-		// Ensure that the primary meepo will always be the first one in the array
-		var meepos = game.findEntitiesByClassname('npc_dota_hero_meepo');
-		var i = 0;
-		if((i = meepos.indexOf(hero)) != 0){
-			var tmp = meepos[0];
-			meepos[0] = hero;
-			meepos[i] = tmp;
-		}
-		
-		return meepos;
+		return game.findEntitiesByClassname('npc_dota_hero_meepo');
 	}else{
 		return [hero];
 	}
 }
 
+dota.removeAll = function(type){
+	game.findEntitiesByClassname(type).forEach(function(ent){
+		dota.remove(ent);
+	});
+}
 
+dota.clearMap = function(){
+	dota.removeAll("npc_dota_tower*");
+	dota.removeAll("npc_dota_fort*");
+	dota.removeAll("npc_dota_barracks*");
+	dota.removeAll("npc_dota_creep*");
+	dota.removeAll("npc_dota_building*");
+	dota.removeAll("ent_dota_fountain*");
+	dota.removeAll("npc_dota_neutral_spawner*");
+	dota.removeAll("npc_dota_roshan_spawner*");
+	dota.removeAll("npc_dota_scripted_spawner*");
+	dota.removeAll("npc_dota_spawner*");
+	dota.removeAll("npc_dota_roshan*");
+}
 
 })();

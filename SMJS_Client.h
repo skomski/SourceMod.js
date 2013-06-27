@@ -33,7 +33,6 @@ public:
 	FUNCTION_DECL(changeTeam);
 
 #if SOURCE_ENGINE == SE_DOTA
-	// Dota specific
 	FUNCTION_DECL(invalidCommand);
 #endif
 	
@@ -53,7 +52,6 @@ public:
 		WRAPPED_FUNC(changeTeam);
 
 #if SOURCE_ENGINE == SE_DOTA
-			// Dota specific
 			WRAPPED_FUNC(invalidCommand);
 #endif
 	}

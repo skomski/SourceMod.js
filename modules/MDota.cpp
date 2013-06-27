@@ -28,6 +28,13 @@
 	} else { \
 		name = *(void**)name; \
 	}
+
+#define FIND_DOTA_PTR2(name, type) \
+	if(!dotaConf->GetMemSig(#name, (void**) &name) || name == NULL){ \
+		smutils->LogError(myself, "Couldn't sigscan " #name); \
+	} else { \
+		name = *(type**)name; \
+	}
 	
 
 #define FIND_DOTA_FUNC(name) \
@@ -37,32 +44,44 @@
 
 WRAPPED_CLS_CPP(MDota, SMJS_Module);
 
-static IGameConfig *dotaConf = NULL;
-static void *LoadParticleFile;
-static void *CreateUnit;
+enum LobbyType {
+	LT_INVALID = -1,
+	LT_PUBLIC_MM = 0,
+	LT_PRACTISE,
+	LT_TOURNAMENT,
+	LT_TUTORIAL,
+	LT_COOP_BOTS,
+	LT_TEAM_MM,
+	LT_SOLO_QUEUE
+};
 
-static void *GameManager;
+struct LobbyData {
+	void **vtable;
+	uint8_t padding01[80];
 
-static int waitingForPlayersCount = 10;
-static int* waitingForPlayersCountPtr = NULL;
-static int* expRequiredForLevel = NULL;
+	int gameMode; // 84
+	int unknown01; // 88, values seen: 2, 3
 
-static CDetour *parseUnitDetour;
-static CDetour *getAbilityValueDetour;
-static CDetour *clientPickHeroDetour;
-static CDetour *heroBuyItemDetour;
+	uint8_t padding02[8];
 
-static void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
-static CBaseEntity* (*DCreateItem)(const char *item, void *unit, void *unit2);
-static int (__stdcall *DGiveItem)(CBaseEntity *inventory, int a4, int a5, char a6); // eax = 0, ecx = item
-static void (*DDestroyItem)(CBaseEntity *item);
-static int (__stdcall *StealAbility)(CBaseEntity *hero, CBaseEntity *newAbility, int slot, int somethingUsuallyZero);
-static CBaseEntity* (*DCreateItemDrop)(Vector location);
-static void **DLinkItemDrop;
-
-
-static void PatchVersionCheck();
-static void PatchWaitForPlayersCount();
+	LobbyType lobbyType; // 100: 0, 2, 5, 6
+	bool bAllowCheats; // 104
+	bool bFillWithBots; // 105
+	uint8_t padding03[2];
+	void **pSomethingAboutTeams; // 108
+	int numTeams; // 112
+	uint8_t padding04[44];
+	uint32_t matchID; // 160
+	uint8_t padding05[28];
+	void **unknown; // 192
+	int unknown02; // 196
+	uint8_t padding06[8];
+	int unknown03; // 208
+	uint8_t padding07[4];
+	bool bAllowSpectators; // 216
+	uint8_t padding08[44];
+	void **vtable2; // 264
+};
 
 enum FieldType {
 	FT_Void = 0,
@@ -95,6 +114,34 @@ struct AbilityData {
 
 	uint32_t	flags;
 };
+
+static IGameConfig *dotaConf = NULL;
+static void *LoadParticleFile;
+static void *CreateUnit;
+
+static void *GameManager;
+
+static int waitingForPlayersCount = 10;
+static int* waitingForPlayersCountPtr = NULL;
+static int* expRequiredForLevel = NULL;
+
+static CDetour *parseUnitDetour;
+static CDetour *getAbilityValueDetour;
+static CDetour *clientPickHeroDetour;
+static CDetour *heroBuyItemDetour;
+
+static void (*UTIL_Remove)(IServerNetworkable *oldObj);
+static void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
+static CBaseEntity* (*DCreateItem)(const char *item, void *unit, void *unit2);
+static int (__stdcall *DGiveItem)(CBaseEntity *inventory, int a4, int a5, char a6); // eax = 0, ecx = item
+static void (*DDestroyItem)(CBaseEntity *item);
+static int (__stdcall *StealAbility)(CBaseEntity *hero, CBaseEntity *newAbility, int slot, int somethingUsuallyZero);
+static CBaseEntity* (*DCreateItemDrop)(Vector location);
+static void **DLinkItemDrop;
+
+
+static void PatchVersionCheck();
+static void PatchWaitForPlayersCount();
 
 #include "modules/MDota_Detours.h"
 
@@ -129,6 +176,7 @@ MDota::MDota(){
 
 	FIND_DOTA_PTR(GameManager);
 
+	FIND_DOTA_FUNC(UTIL_Remove);
 	FIND_DOTA_FUNC(LoadParticleFile);
 	FIND_DOTA_FUNC(CreateUnit);
 	FIND_DOTA_FUNC(FindClearSpaceForUnit);
@@ -152,13 +200,14 @@ void MDota::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wra
 
 void PatchVersionCheck(){
 	uint8_t *ptr = (uint8_t*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), 
-	"\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x11\x8B\x82\x1C\x02\x00\x00\xFF\xD0\x8B\x2A\x2A\x2A\x2A\x2A"
-	"\x50\x51\x68\x2A\x2A\x2A\x2A\xFF\x2A\x2A\x2A\x2A\x2A\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x11\x8B"
-	"\x82\x98\x00\x00\x00\x83\xC4\x0C\x68\x2A\x2A\x2A\x2A\xFF\xD0", 59);
+	"\x8B\x2A\x2A\x2A\x2A\x2A\x8B\x11\x8B\x82\x2A\x2A\x2A\x2A\xFF\xD0\x8B\x0D\x2A\x2A\x2A\x2A\x50\x51\x68\x2A\x2A\x2A\x2A"
+	"\xFF\x2A\x2A\x2A\x2A\x2A\x8B\x0D\x2A\x2A\x2A\x2A\x8B\x11\x8B\x82\x2A\x2A\x2A\x2A\x83\xC4\x0C\x68\x2A\x2A\x2A\x2A\xFF"
+	"\xD0"
+	, 59);
 
 	if(ptr == NULL){
 		printf("Failed to patch version check!\n");
-		smutils->LogError(myself, "Failed to patch version check!");
+		smutils->LogError(myself, "Failed to patch version check 1!");
 		return;
 	}
 
@@ -169,12 +218,12 @@ void PatchVersionCheck(){
 	}
 
 	ptr = (uint8_t*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), 
-	"\x8B\x11\x8B\x82\x1C\x02\x00\x00\xFF\xD0\x8B\x2A\x2A\x2A\x2A\x2A\x50\x51\x68\x2A\x2A\x2A\x2A\xFF\x2A\x2A\x2A\x2A\x2A"
+	"\x8B\x11\x8B\x82\x2A\x2A\x2A\x2A\xFF\xD0\x8B\x2A\x2A\x2A\x2A\x2A\x50\x51\x68\x2A\x2A\x2A\x2A\xFF\x2A\x2A\x2A\x2A\x2A"
 	"\x83\xC4\x0C\x38\x2A\x2A\x2A\x2A\x2A\x74\x50", 40);
 
 	if(ptr == NULL){
 		printf("Failed to patch version check!\n");
-		smutils->LogError(myself, "Failed to patch version check!");
+		smutils->LogError(myself, "Failed to patch version check 2!");
 		return;
 	}
 
@@ -321,6 +370,19 @@ const char* MDota::HeroIdToClassname(int id) {
 	return NULL;
 }
 
+FUNCTION_M(MDota::remove)
+	PENT(ent);
+	if(ent == NULL) THROW("Entity cannot be null");
+
+	IServerUnknown *pUnk = (IServerUnknown *)ent->ent;
+	IServerNetworkable *pNet = pUnk->GetNetworkable();
+	if(pNet == NULL) THROW("Entity doesn't have a IServerNetworkable");
+
+	UTIL_Remove(pNet);
+
+	RETURN_UNDEF;
+END
+
 FUNCTION_M(MDota::heroIdToClassname)
 	PINT(id);
 	auto ret = HeroIdToClassname(id);
@@ -420,7 +482,6 @@ FUNCTION_M(MDota::giveItemToHero)
 	USE_NETPROP_OFFSET(offset, CDOTA_BaseNPC, m_Inventory, v8::Null());
 
 	PSTR(itemClsname);
-	POBJ(unit);
 	PENT(ent);
 	if(ent == NULL){
 		THROW("Must provide a valid hero");
@@ -555,4 +616,157 @@ FUNCTION_M(MDota::createItemDrop)
 	}
 
 	RETURN_SCOPED(GetEntityWrapper(drop)->GetWrapper(GetPluginRunning()));
+END
+
+FUNCTION_M(MDota::levelUpHero)
+	PENT(unit);
+	PBOL(playEffects);
+
+	static ICallWrapper *g_pLevelUpHero = NULL;
+	if (!g_pLevelUpHero){
+		int offset;
+		
+		if (!dotaConf->GetOffset("HeroLevelUp", &offset)){
+			THROW("\"HeroLevelUp\" not supported by this mod");
+		}
+
+		PassInfo pass[1];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(bool);
+		
+		if (!(g_pLevelUpHero = binTools->CreateVCall(offset, 0, 0, NULL, pass, 1))){
+			THROW("\"HeroLevelUp\" wrapper failed to initialized");
+		}
+	}
+
+	unsigned char vstk[sizeof(void *) + sizeof(bool)];
+	unsigned char *vptr = vstk;
+	
+	*(void **)vptr = unit->ent;
+	vptr += sizeof(void *);
+
+	*(bool *)vptr = playEffects;
+	vptr += sizeof(bool);
+
+	void *ret;
+	g_pLevelUpHero->Execute(vstk, &ret);
+
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(MDota::levelUpAbility)
+	USE_NETPROP_OFFSET(abilityPointsOffset, CDOTA_BaseNPC_Hero, m_iAbilityPoints, v8::Undefined());
+	
+	PENT(unit);
+	PENT(ability);
+
+	static ICallWrapper *g_pLevelUpHeroAbility = NULL;
+	if (!g_pLevelUpHeroAbility){
+		int offset;
+		
+		if (!dotaConf->GetOffset("HeroLevelUpAbility", &offset)){
+			THROW("\"HeroLevelUpAbility\" not supported by this mod");
+		}
+
+		PassInfo pass[1];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(void*);
+		
+		if (!(g_pLevelUpHeroAbility = binTools->CreateVCall(offset, 0, 0, NULL, pass, 1))){
+			THROW("\"HeroLevelUpAbility\" wrapper failed to initialized");
+		}
+	}
+
+	// This function subtracts one point from the ability points, without even checking if
+	// it can. Add one point to it so it behaves like we'd expect.
+	*(int*)((intptr_t) unit + abilityPointsOffset) += 1;
+
+	unsigned char vstk[sizeof(void *) + sizeof(void *)];
+	unsigned char *vptr = vstk;
+	
+	*(void **)vptr = unit->ent;
+	vptr += sizeof(void *);
+
+	*(void **)vptr = ability->ent;
+	vptr += sizeof(void*);
+
+	void *ret;
+	g_pLevelUpHeroAbility->Execute(vstk, &ret);
+
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(MDota::giveExperienceToHero)
+	PENT(unit);
+	PNUM(amount);
+
+	static ICallWrapper *g_pHeroGiveExperience = NULL;
+	if (!g_pHeroGiveExperience){
+		int offset;
+		
+		if (!dotaConf->GetOffset("HeroGiveExperience", &offset)){
+			THROW("\"HeroGiveExperience\" not supported by this mod");
+		}
+
+		PassInfo pass[1];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(float);
+		
+		if (!(g_pHeroGiveExperience = binTools->CreateVCall(offset, 0, 0, NULL, pass, 1))){
+			THROW("\"HeroGiveExperience\" wrapper failed to initialized");
+		}
+	}
+
+	unsigned char vstk[sizeof(void *) + sizeof(float)];
+	unsigned char *vptr = vstk;
+	
+	*(void **)vptr = unit->ent;
+	vptr += sizeof(void *);
+
+	*(float *)vptr = amount;
+	vptr += sizeof(float);
+
+	void *ret;
+	g_pHeroGiveExperience->Execute(vstk, &ret);
+
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(MDota::_unitInvade)
+	PENT(unit);
+
+	static ICallWrapper *g_pUnitInvade = NULL;
+	if (!g_pUnitInvade){
+		int offset;
+		
+		if (!dotaConf->GetOffset("UnitInvade", &offset)){
+			THROW("\"UnitInvade\" not supported by this mod");
+		}
+
+		PassInfo pass[1];
+		pass[0].type = PassType_Basic;
+		pass[0].flags = PASSFLAG_BYVAL;
+		pass[0].size = sizeof(char);
+		
+		if (!(g_pUnitInvade = binTools->CreateVCall(offset, 0, 0, NULL, pass, 1))){
+			THROW("\"UnitInvade\" wrapper failed to initialized");
+		}
+	}
+
+	unsigned char vstk[sizeof(void *) + sizeof(char)];
+	unsigned char *vptr = vstk;
+	
+	*(void **)vptr = unit->ent;
+	vptr += sizeof(void *);
+
+	*(char *)vptr = 0;
+	vptr += sizeof(char);
+
+	void *ret;
+	g_pUnitInvade->Execute(vstk, &ret);
+
+	RETURN_UNDEF;
 END

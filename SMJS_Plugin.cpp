@@ -113,11 +113,13 @@ std::vector<v8::Persistent<v8::Function>>* SMJS_Plugin::GetHooks(char const *typ
 
 	auto vec = GetHooks(type);
 
-	HandleScope handle_scope(isolate);
-	Context::Scope context_scope(context);
-	auto g = context->Global()->Get(v8::String::New(type));
-	if(!g.IsEmpty() && g->IsFunction()){
-		vec->push_back(v8::Persistent<v8::Function>::New(v8::Local<v8::Function>::Cast(g)));
+	if(apiVersion < 5){
+		HandleScope handle_scope(isolate);
+		Context::Scope context_scope(context);
+		auto g = context->Global()->Get(v8::String::New(type));
+		if(!g.IsEmpty() && g->IsFunction()){
+			vec->push_back(v8::Persistent<v8::Function>::New(v8::Local<v8::Function>::Cast(g)));
+		}
 	}
 
 	return vec;
@@ -275,7 +277,13 @@ bool SMJS_Plugin::LoadFile(const char* file, bool asGlobal, v8::Handle<v8::Value
 #endif
 	
 	FILE* fileHandle = fopen(path, "rb");
-	if(fileHandle == NULL) return false;
+	if(fileHandle == NULL){
+		// Fall back to read the .js file from the lib folder
+		char buffer[512];
+		smutils->BuildPath(Path_SM, buffer, sizeof(buffer), "/sourcemod.js/lib/%s.js", file);
+		fileHandle = fopen(buffer, "rb");
+		if(fileHandle == NULL) return false;
+	}
 
 	fseek(fileHandle, 0, SEEK_END);
 	size_t size = ftell(fileHandle);

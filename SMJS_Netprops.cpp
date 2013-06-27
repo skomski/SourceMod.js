@@ -208,8 +208,14 @@ v8::Handle<v8::Value> SMJS_Netprops::SSetNetProp(void *ent, edict_t *edict, Send
 	bool is_unsigned = ((p->GetFlags() & SPROP_UNSIGNED) == SPROP_UNSIGNED);
 	void *addr = (void*) ((intptr_t) ent + offset);
 
+	auto type = p->GetType();
 
-	switch(p->GetType()){
+	// A workaround for some weird netprops
+	if(bit_count == 0 && strlen(propNameStdString.c_str()) >= 5 && std::strncmp(propNameStdString.c_str(), "m_vec", 5) == 0){
+		type = DPT_Vector;
+	}
+
+	switch(type){
 	case DPT_Int:
 	case DPT_Int64:
 	{
@@ -317,7 +323,14 @@ v8::Handle<v8::Value> SMJS_Netprops::SGetNetProp(void *ent, edict_t *edict, Send
 
 	if(isCacheable != NULL) *isCacheable = false;
 
-	switch(p->GetType()){
+	auto type = p->GetType();
+
+	// A workaround for some weird netprops
+	if(bit_count == 0 && strlen(propNameStdString.c_str()) >= 5 && std::strncmp(propNameStdString.c_str(), "m_vec", 5) == 0){
+		type = DPT_Vector;
+	}
+
+	switch(type){
 	case DPT_Int:
 	case DPT_Int64:
 	{

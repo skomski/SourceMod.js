@@ -122,6 +122,7 @@ public:
 
 	static const char *HeroIdToClassname(int id);
 
+	FUNCTION_DECL(remove);
 	FUNCTION_DECL(heroIdToClassname);
 	FUNCTION_DECL(loadParticleFile);
 	FUNCTION_DECL(forceWin);
@@ -134,10 +135,16 @@ public:
 	FUNCTION_DECL(sendStatPopup);
 	FUNCTION_DECL(setHeroAvailable);
 	FUNCTION_DECL(createItemDrop);
+	FUNCTION_DECL(levelUpHero);
+	FUNCTION_DECL(levelUpAbility);
+	FUNCTION_DECL(giveExperienceToHero);
+
+	FUNCTION_DECL(_unitInvade);
 
 	WRAPPED_CLS(MDota, SMJS_Module) {
 		temp->SetClassName(v8::String::NewSymbol("DotaModule"));
 
+		WRAPPED_FUNC(remove);
 		WRAPPED_FUNC(heroIdToClassname);
 		WRAPPED_FUNC(loadParticleFile);
 		WRAPPED_FUNC(forceWin);
@@ -150,6 +157,11 @@ public:
 		WRAPPED_FUNC(sendStatPopup);
 		WRAPPED_FUNC(setHeroAvailable);
 		WRAPPED_FUNC(createItemDrop);
+		WRAPPED_FUNC(levelUpHero);
+		WRAPPED_FUNC(levelUpAbility);
+		WRAPPED_FUNC(giveExperienceToHero);
+
+		WRAPPED_FUNC(_unitInvade);
 
 #define HERO_ID_CONST(name, value) proto->Set(v8::String::New("HERO_" #name), v8::Int32::New(Hero_##value), v8::ReadOnly);
 		

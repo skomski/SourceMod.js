@@ -477,9 +477,9 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">smjs.ext</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Fast Compilation|Win32'">smjs.ext</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release with Symbols|Win32'">smjs.ext</TargetName>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release/</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\dota 2 beta\dota\addons\sourcemod\extensions\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Fast Compilation|Win32'">Fast Compilation/</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release with Symbols|Win32'">Release with Symbols/</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release with Symbols|Win32'">E:\dota 2 beta\dota\addons\sourcemod\extensions\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\Administrador\Desktop\dota 2 beta\dota\addons\sourcemod\extensions\</OutDir>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\boost_1_53_0\;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\hl2sdk-dota\lib\public\;..\v8\v8\build\Debug\lib;..\lib;..\..\..\hl2sdk-dota\lib\win32\debug\vs2010;$(LibraryPath)</LibraryPath>
@@ -1269,6 +1269,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\hl2sdk-dota\public\engine\protobuf\netmessages.pb.cc" />
+    <ClCompile Include="..\..\..\hl2sdk-dota\public\engine\protobuf\networkbasetypes.pb.cc" />
     <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessages.pb.cc" />
     <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessage_helpers.cpp" />
     <ClCompile Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_commonmessages.pb.cc" />
@@ -1310,6 +1311,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\hl2sdk-dota\public\engine\protobuf\netmessages.pb.h" />
+    <ClInclude Include="..\..\..\hl2sdk-dota\public\engine\protobuf\networkbasetypes.pb.h" />
     <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessages.pb.h" />
     <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessage_helpers.h" />
     <ClInclude Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_commonmessages.pb.h" />
@@ -1359,6 +1361,12 @@
     <ClInclude Include="..\SMJS_Plugin.h" />
     <ClInclude Include="..\SMJS_SimpleWrapped.h" />
     <ClInclude Include="..\SMJS_VKeyValues.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\hl2sdk-dota\public\engine\protobuf\networkbasetypes.proto" />
+    <None Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_clientmessages.proto" />
+    <None Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_commonmessages.proto" />
+    <None Include="..\..\..\hl2sdk-dota\public\game\shared\dota\protobuf\dota_usermessages.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

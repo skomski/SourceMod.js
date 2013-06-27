@@ -10,6 +10,21 @@
 				"windows"	"****\x8B\xF0\xE8****\x0F\xB7\xC0\xB9\xFF\xFF\x00\x00\x66\x3B\xC1\x75*\x33\xC0\xEB"
 			}
 			
+			"LobbyObject"
+			{
+				"library"	"server"
+				"windows"	"****\x85\xC0\x74\x0F\x80\x78\x68\x00\x74\x09\x83\x78\x64\x01\x75\x03\xB0\x01\xC3"
+			}
+			
+			/*
+				void UTIL_Remove(IServerNetworkable *oldObj);
+			*/
+			"UTIL_Remove"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x56\x8B\x75\x08\x57\x85\xF6\x74*\x8B\x46\x08\xF6\x80****\x01\x75*\x8B"
+			}
+			
 			"LoadParticleFile"
 			{
 				"library"	"server"
@@ -186,8 +201,42 @@
 			*/
 			"HeroLevelUp"
 			{
+				"windows"	"422"
+			}
+			
+			/*
+				
+				int __thiscall UnitInvade(void *this, char a2);
+				55 8B EC 53 56 57 8B F9 8A 4D 08 38 8F ? ? ? ? 74 ? 8B C7 80 78 ? 00 74 ? 80 48 ? 01
+				"modifier_roquelaire"
+			*/
+			"UnitInvade"
+			{
+				"windows"	"371"
+			}
+			
+			/*
+				void* __thiscall HeroLevelUpAbility(void *this, void *ability)
+				
+				55 8B EC 83 E4 F8 83 EC 0C 53 56 57 8B 7D 08 8B F1 8B 8F ? ? ? ? 89 74 24 10 83 F9 FF 74
+			*/
+			"HeroLevelUpAbility"
+			{
+				"windows"	"425"
+			}
+			
+			
+			/*
+				bool __thiscall HeroGiveExperience(void *this, float amount);
+				
+				55 8B EC 83 EC 08 57 8B F9 80 BF ? ? ? ? 01 75 ? 32 C0 5F 8B E5 5D C2 04 00 8B 8F ? ? ? ? 56 83 F9 FF
+			*/
+			"HeroGiveExperience"
+			{
 				"windows"	"423"
 			}
+			
+			
 		}
 	}
 }
