@@ -47,6 +47,10 @@ dota.COMBAT_CLASS_DEFEND_STRUCTURE = 3;
 dota.COMBAT_CLASS_DEFEND_HERO = 4;
 dota.COMBAT_CLASS_DEFEND_SOFT = 5;
 
+dota.UNIT_TARGET_TEAM_FRIENDLY = 1;
+dota.UNIT_TARGET_TEAM_ENEMY = 2;
+dota.UNIT_TARGET_TEAM_BOTH = 3;
+dota.UNIT_TARGET_TEAM_CUSTOM = 4;
 
 /////////////// Unit states ///////////////
 // ethereal: 1 + 3
@@ -112,7 +116,7 @@ dota.UNIT_TARGET_FLAG_NOT_CREEP_HERO =            1 << 17;
 // Ancient = 32 + 16
 
 dota.UNIT_TYPE_FLAG_HERO =       1 <<  0;
-//dota.UNIT_TYPE_FLAG_ =         1 <<  1;
+dota.UNIT_TYPE_FLAG_MECHANICAL = 1 <<  1; // Seems unused
 dota.UNIT_TYPE_FLAG_TOWER =      1 <<  2;
 dota.UNIT_TYPE_FLAG_SIEGE =      1 <<  3;
 dota.UNIT_TYPE_FLAG_BUILDING =   1 <<  4;
@@ -120,9 +124,19 @@ dota.UNIT_TYPE_FLAG_ANCIENT =    1 <<  5;
 dota.UNIT_TYPE_FLAG_BARRACKS =   1 <<  6;
 dota.UNIT_TYPE_FLAG_CREEP =      1 <<  7;
 dota.UNIT_TYPE_FLAG_COURIER =    1 <<  8;
-//dota.UNIT_TYPE_FLAG_ =         1 <<  9;
+dota.UNIT_TYPE_FLAG_SHOP =       1 <<  9;
 dota.UNIT_TYPE_FLAG_LANE_CREEP = 1 << 10;
 dota.UNIT_TYPE_FLAG_ROSHAN =     1 << 11;
+
+
+/////////////// Unit target type flags ///////////////
+dota.UNIT_TARGET_TYPE_MECHANICAL = 1 << 0;
+dota.UNIT_TARGET_TYPE_GENERAL =    1 << 1;
+dota.UNIT_TARGET_TYPE_BUILDINGS =  1 << 2;
+dota.UNIT_TARGET_TYPE_SIEGES =     1 << 3;
+dota.UNIT_TARGET_TYPE_COURIERS =   1 << 4;
+dota.UNIT_TARGET_TYPE_SHOP =       1 << 5;
+
 
 // The actual offset is around 0x2770, but it may change, so we store it as a relative
 // offset from the closest prop we know
