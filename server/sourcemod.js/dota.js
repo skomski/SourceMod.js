@@ -78,6 +78,7 @@ dota.UNIT_STATE_DOMINATED =       1 << 29;
 
 /////////////// Unit target flags ///////////////
 
+//dota.UNIT_TARGET_FLAG_ =                        1 <<  0;
 dota.UNIT_TARGET_FLAG_RANGED =                    1 <<  1;
 dota.UNIT_TARGET_FLAG_NOT_RANGED =                1 <<  2;
 dota.UNIT_TARGET_FLAG_DEAD =                      1 <<  3;
@@ -95,8 +96,33 @@ dota.UNIT_TARGET_FLAG_ETHEREAL =                  1 << 14;
 dota.UNIT_TARGET_FLAG_HAS_MANA =                  1 << 15;
 //dota.UNIT_TARGET_FLAG_ =                        1 << 16;
 dota.UNIT_TARGET_FLAG_NOT_CREEP_HERO =            1 << 17;
-//dota.UNIT_TARGET_FLAG =\                        1 << 18; // filters only passes if: (has this flag || does not have unit flag 31)
+//dota.UNIT_TARGET_FLAG =                         1 << 18; // filters only passes if: (has this flag || does not have unit flag 31)
 //dota.UNIT_TARGET_FLAG =                         1 << 19; // has unit state 12
+
+/////////////// Unit type flags ///////////////
+// Couriers = 0
+// Heroes = 1
+// Roshan is a creep and roshan
+// Lane creeps are lane creeps and creeps
+// Neutral creeps are only creeps
+// Siege creeps = 8
+// Towers = 16 + 4
+// Barracks = 64 + 16
+// Building = 16
+// Ancient = 32 + 16
+
+dota.UNIT_TYPE_FLAG_HERO =       1 <<  0;
+//dota.UNIT_TYPE_FLAG_ =         1 <<  1;
+dota.UNIT_TYPE_FLAG_TOWER =      1 <<  2;
+dota.UNIT_TYPE_FLAG_SIEGE =      1 <<  3;
+dota.UNIT_TYPE_FLAG_BUILDING =   1 <<  4;
+dota.UNIT_TYPE_FLAG_ANCIENT =    1 <<  5;
+dota.UNIT_TYPE_FLAG_BARRACKS =   1 <<  6;
+dota.UNIT_TYPE_FLAG_CREEP =      1 <<  7;
+dota.UNIT_TYPE_FLAG_COURIER =    1 <<  8;
+//dota.UNIT_TYPE_FLAG_ =         1 <<  9;
+dota.UNIT_TYPE_FLAG_LANE_CREEP = 1 << 10;
+dota.UNIT_TYPE_FLAG_ROSHAN =     1 << 11;
 
 // The actual offset is around 0x2770, but it may change, so we store it as a relative
 // offset from the closest prop we know
