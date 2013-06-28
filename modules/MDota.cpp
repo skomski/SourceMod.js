@@ -12,12 +12,12 @@
 #define WAIT_FOR_PLAYERS_COUNT_SIG "\x83\x3D****\x00\x7E\x19\x8B\x0D****\x83\x79\x30\x00"
 #define WAIT_FOR_PLAYERS_COUNT_SIG_LEN 19
 
-#define USE_NETPROP_OFFSET(varName, clsName, propName, retFail) static int varName = 0; \
+#define USE_NETPROP_OFFSET(varName, clsName, propName) \
+	static int varName = 0; \
 	if(varName == 0){ \
 		sm_sendprop_info_t prop; \
 		if(!SMJS_Netprops::GetClassPropInfo(#clsName, #propName, &prop)){ \
-			printf("Couldn't find " #clsName " in " #propName); \
-			RETURN_SCOPED(retFail); \
+			THROW("Couldn't find netprop " #clsName " in " #propName); \
 		} \
 		varName = prop.actual_offset; \
 	}
@@ -131,6 +131,7 @@ static CDetour *clientPickHeroDetour;
 static CDetour *heroBuyItemDetour;
 
 static void (*UTIL_Remove)(IServerNetworkable *oldObj);
+static void **FindUnitsInRadius;
 static void* (*FindClearSpaceForUnit)(void *unit, Vector vec, int bSomething);
 static CBaseEntity* (*DCreateItem)(const char *item, void *unit, void *unit2);
 static int (__stdcall *DGiveItem)(CBaseEntity *inventory, int a4, int a5, char a6); // eax = 0, ecx = item
@@ -139,6 +140,13 @@ static int (__stdcall *StealAbility)(CBaseEntity *hero, CBaseEntity *newAbility,
 static CBaseEntity* (*DCreateItemDrop)(Vector location);
 static void **DLinkItemDrop;
 
+// Because we need to pass a vector for the game to fill,
+// when it tries to expand it, it'll corrupt the heap because the way that
+// we allocate memory isn't the same one as the server.dll is allocating it
+// (we're not using Valve's allocator)
+// So we need to create a vector large enough that the game won't try to expand it
+// and we'll be fine.
+static CUtlVector<CBaseHandle> findClearSpaceForUnitOutput(0, 2048);
 
 static void PatchVersionCheck();
 static void PatchWaitForPlayersCount();
@@ -148,6 +156,7 @@ static void PatchWaitForPlayersCount();
 MDota::MDota(){
 	identifier = "dota";
 
+	printf("Initializing dota.js module...\n");
 	PatchVersionCheck();
 	PatchWaitForPlayersCount();
 
@@ -177,6 +186,7 @@ MDota::MDota(){
 	FIND_DOTA_PTR(GameManager);
 
 	FIND_DOTA_FUNC(UTIL_Remove);
+	FIND_DOTA_FUNC(FindUnitsInRadius);
 	FIND_DOTA_FUNC(LoadParticleFile);
 	FIND_DOTA_FUNC(CreateUnit);
 	FIND_DOTA_FUNC(FindClearSpaceForUnit);
@@ -186,11 +196,14 @@ MDota::MDota(){
 	FIND_DOTA_FUNC(StealAbility);
 	FIND_DOTA_FUNC(DCreateItemDrop);
 	FIND_DOTA_FUNC(DLinkItemDrop);
+	
 
 	expRequiredForLevel = (int*) memutils->FindPattern(g_SMAPI->GetServerFactory(false), "\x00\x00\x00\x00\xC8\x00\x00\x00\xF4\x01\x00\x00\x84\x03\x00\x00\x78\x05\x00\x00", 20);
 	if(expRequiredForLevel == NULL){
 		smutils->LogError(myself, "Couldn't find expRequiredForLevel\n");
 	}
+
+	printf("Done!\n");
 }
 
 void MDota::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
@@ -479,7 +492,7 @@ FUNCTION_M(MDota::setWaitForPlayersCount)
 END
 
 FUNCTION_M(MDota::giveItemToHero)
-	USE_NETPROP_OFFSET(offset, CDOTA_BaseNPC, m_Inventory, v8::Null());
+	USE_NETPROP_OFFSET(offset, CDOTA_BaseNPC, m_Inventory);
 
 	PSTR(itemClsname);
 	PENT(ent);
@@ -543,7 +556,7 @@ FUNCTION_M(MDota::setTotalExpRequiredForLevel)
 END
 
 FUNCTION_M(MDota::sendStatPopup)
-	USE_NETPROP_OFFSET(offset, CDOTAPlayer, m_iPlayerID, v8::Boolean::New(false));
+	USE_NETPROP_OFFSET(offset, CDOTAPlayer, m_iPlayerID);
 	
 	POBJ(targetObj);
 
@@ -573,9 +586,9 @@ FUNCTION_M(MDota::sendStatPopup)
 END
 
 FUNCTION_M(MDota::setHeroAvailable)
-	USE_NETPROP_OFFSET(stableOffset, CDOTAGameManagerProxy, m_StableHeroAvailable, v8::Undefined());
-	USE_NETPROP_OFFSET(currentOffset, CDOTAGameManagerProxy, m_CurrentHeroAvailable, v8::Undefined());
-	USE_NETPROP_OFFSET(culledOffset, CDOTAGameManagerProxy, m_CulledHeroes, v8::Undefined());
+	USE_NETPROP_OFFSET(stableOffset, CDOTAGameManagerProxy, m_StableHeroAvailable);
+	USE_NETPROP_OFFSET(currentOffset, CDOTAGameManagerProxy, m_CurrentHeroAvailable);
+	USE_NETPROP_OFFSET(culledOffset, CDOTAGameManagerProxy, m_CulledHeroes);
 	
 	PINT(hero);
 	PBOL(available);
@@ -656,7 +669,7 @@ FUNCTION_M(MDota::levelUpHero)
 END
 
 FUNCTION_M(MDota::levelUpAbility)
-	USE_NETPROP_OFFSET(abilityPointsOffset, CDOTA_BaseNPC_Hero, m_iAbilityPoints, v8::Undefined());
+	USE_NETPROP_OFFSET(abilityPointsOffset, CDOTA_BaseNPC_Hero, m_iAbilityPoints);
 	
 	PENT(unit);
 	PENT(ability);
@@ -733,6 +746,65 @@ FUNCTION_M(MDota::giveExperienceToHero)
 	g_pHeroGiveExperience->Execute(vstk, &ret);
 
 	RETURN_UNDEF;
+END
+
+FUNCTION_M(MDota::unitHasState)
+	USE_NETPROP_OFFSET(stateOffset, CDOTA_BaseNPC, m_nUnitState);
+	PENT(unit);
+	PINT(state);
+	
+	bool res = (*(uint32_t*)((intptr_t) unit->ent + stateOffset) & (1 << state)) == (1 << state);
+
+	RETURN_SCOPED(v8::Boolean::New(res));
+END
+
+FUNCTION_M(MDota::findUnitsInRadius)
+	PENT(ent);
+	PINT(team);
+	PNUM(radius);
+	PNUM(x);
+	PNUM(y);
+	PINT(targetTeamFlags);
+	PINT(targetUnitTypeFlags);
+	PINT(targetUnitStateFlags);
+
+	printf("Finding units in radius...\n");
+
+	float radiusF = radius;
+	CBaseEntity *pEntity = ent ? ent->ent : NULL;
+
+	
+	Vector pos(x, y, 0.0f);
+
+	findClearSpaceForUnitOutput.RemoveAll();
+
+	Vector *posPointer = &pos;
+	auto outputPointer = &findClearSpaceForUnitOutput;
+
+	__asm {
+		push    0
+		push    0
+		push    targetUnitStateFlags
+		push    targetUnitTypeFlags
+		push    targetTeamFlags
+		push    radiusF
+		push    pEntity
+		push    posPointer
+		push    team
+		mov     eax, outputPointer
+		call    FindUnitsInRadius
+		add     esp, 36
+	}
+
+	auto pl = GetPluginRunning();
+	auto arr = v8::Array::New(findClearSpaceForUnitOutput.Count());
+	for(int i = 0; i < findClearSpaceForUnitOutput.Count(); ++i){
+		CBaseEntity *foundEnt = gamehelpers->ReferenceToEntity(findClearSpaceForUnitOutput[i].GetEntryIndex());
+		auto entWrapper = GetEntityWrapper(foundEnt);
+		arr->Set(i, entWrapper->GetWrapper(pl));
+	}
+
+	RETURN_SCOPED(arr);
 END
 
 FUNCTION_M(MDota::_unitInvade)

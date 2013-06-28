@@ -25,6 +25,25 @@
 				"windows"	"\x55\x8B\xEC\x83\xE4\xF8\x56\x8B\x75\x08\x57\x85\xF6\x74*\x8B\x46\x08\xF6\x80****\x01\x75*\x8B"
 			}
 			
+			/*
+				int __usercall FindUnitsInRadius<eax>(CUtlVector *vecOut<eax>, int team, Vector *position, void *ent, float radius, char targetTeamFlags, int targetUnitTypeFlags, int targetUnitStateFlags, int a9, char bSomething)
+				
+				This is one of the most complicated functions to call. I'll explain it slowly.
+				
+				vecOut is where the results are put
+				team is the team where this search is coming from (usually ent), this is for the targetTeamFlags
+				ent may be null, it's usually the entity that's doing the search
+				radius is the radius, duh
+				
+				a9 and bSomething are usually 0, I don't know what they mean
+			*/
+			
+			"FindUnitsInRadius"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xE4\xF0\x81\xEC\x74\x01\x00\x00\x53\x56\x8B\x75\x0C\x57\x8B\xF8\xA1"
+			}
+			
 			"LoadParticleFile"
 			{
 				"library"	"server"

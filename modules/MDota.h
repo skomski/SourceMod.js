@@ -138,6 +138,8 @@ public:
 	FUNCTION_DECL(levelUpHero);
 	FUNCTION_DECL(levelUpAbility);
 	FUNCTION_DECL(giveExperienceToHero);
+	FUNCTION_DECL(unitHasState);
+	FUNCTION_DECL(findUnitsInRadius);
 
 	FUNCTION_DECL(_unitInvade);
 
@@ -160,6 +162,8 @@ public:
 		WRAPPED_FUNC(levelUpHero);
 		WRAPPED_FUNC(levelUpAbility);
 		WRAPPED_FUNC(giveExperienceToHero);
+		WRAPPED_FUNC(unitHasState);
+		WRAPPED_FUNC(findUnitsInRadius);
 
 		WRAPPED_FUNC(_unitInvade);
 

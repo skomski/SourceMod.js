@@ -68,40 +68,40 @@ dota.UNIT_TARGET_TEAM_CUSTOM = 4;
 // 24 flying and flying vision
 // 30 makes the unity not give vision
 /// Unit can still turn around and attack
-dota.UNIT_STATE_ROOTED =          1 <<  0;
-dota.UNIT_STATE_SILENCED =        1 <<  4;
+dota.UNIT_STATE_ROOTED = 0;
+dota.UNIT_STATE_SILENCED = 4;
 /// Does not send an error if the player tries to act, just queues the action for when
 /// this state is removed
-dota.UNIT_STATE_CANT_ACT =        1 <<  6;
-dota.UNIT_STATE_INVISIBLE =       1 <<  8;
-dota.UNIT_STATE_INVULNERABLE =    1 <<  9;
-dota.UNIT_STATE_MAGIC_IMMUNE =    1 << 10;
+dota.UNIT_STATE_CANT_ACT = 6;
+dota.UNIT_STATE_INVISIBLE = 8;
+dota.UNIT_STATE_INVULNERABLE = 9;
+dota.UNIT_STATE_MAGIC_IMMUNE = 10;
 /// Sends an error if the player tries to act
-dota.UNIT_STATE_CANT_ACT2 =       1 << 19;
-dota.UNIT_STATE_DOMINATED =       1 << 29;
+dota.UNIT_STATE_CANT_ACT2 = 19;
+dota.UNIT_STATE_DOMINATED = 29;
 
 /////////////// Unit target flags ///////////////
 
-//dota.UNIT_TARGET_FLAG_ =                        1 <<  0;
-dota.UNIT_TARGET_FLAG_RANGED =                    1 <<  1;
-dota.UNIT_TARGET_FLAG_NOT_RANGED =                1 <<  2;
-dota.UNIT_TARGET_FLAG_DEAD =                      1 <<  3;
-dota.UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES =      1 <<  4;
-dota.UNIT_TARGET_FLAG_NOT_MAGIC_IMMUNE_ALLIES =   1 <<  5;
-dota.UNIT_TARGET_FLAG_INVULNERABLE =              1 <<  6;
-dota.UNIT_TARGET_FLAG_FOW_VISIBLE =               1 <<  7;
-dota.UNIT_TARGET_FLAG_VISIBLE =                   1 <<  8;
-dota.UNIT_TARGET_FLAG_NOT_ANCIENTS =              1 <<  9;
-dota.UNIT_TARGET_FLAG_CONTROLLABLE_BY_PLAYERS =   1 << 10;
-dota.UNIT_TARGET_FLAG_NOT_DOMINATED =             1 << 11;
-dota.UNIT_TARGET_FLAG_NOT_SUMMONED =              1 << 12;
-dota.UNIT_TARGET_FLAG_NOT_ILLUSIONS =             1 << 13;
-dota.UNIT_TARGET_FLAG_ETHEREAL =                  1 << 14;
-dota.UNIT_TARGET_FLAG_HAS_MANA =                  1 << 15;
-//dota.UNIT_TARGET_FLAG_ =                        1 << 16;
-dota.UNIT_TARGET_FLAG_NOT_CREEP_HERO =            1 << 17;
-//dota.UNIT_TARGET_FLAG =                         1 << 18; // filters only passes if: (has this flag || does not have unit flag 31)
-//dota.UNIT_TARGET_FLAG =                         1 << 19; // has unit state 12
+//dota.UNIT_TARGET_STATE_FLAG_ =                        1 <<  0;
+dota.UNIT_TARGET_STATE_FLAG_RANGED =                    1 <<  1;
+dota.UNIT_TARGET_STATE_FLAG_NOT_RANGED =                1 <<  2;
+dota.UNIT_TARGET_STATE_FLAG_DEAD =                      1 <<  3;
+dota.UNIT_TARGET_STATE_FLAG_MAGIC_IMMUNE_ENEMIES =      1 <<  4;
+dota.UNIT_TARGET_STATE_FLAG_NOT_MAGIC_IMMUNE_ALLIES =   1 <<  5;
+dota.UNIT_TARGET_STATE_FLAG_INVULNERABLE =              1 <<  6;
+dota.UNIT_TARGET_STATE_FLAG_FOW_VISIBLE =               1 <<  7;
+dota.UNIT_TARGET_STATE_FLAG_VISIBLE =                   1 <<  8;
+dota.UNIT_TARGET_STATE_FLAG_NOT_ANCIENTS =              1 <<  9;
+dota.UNIT_TARGET_STATE_FLAG_CONTROLLABLE_BY_PLAYERS =   1 << 10;
+dota.UNIT_TARGET_STATE_FLAG_NOT_DOMINATED =             1 << 11;
+dota.UNIT_TARGET_STATE_FLAG_NOT_SUMMONED =              1 << 12;
+dota.UNIT_TARGET_STATE_FLAG_NOT_ILLUSIONS =             1 << 13;
+dota.UNIT_TARGET_STATE_FLAG_ETHEREAL =                  1 << 14;
+dota.UNIT_TARGET_STATE_FLAG_HAS_MANA =                  1 << 15;
+//dota.UNIT_TARGET_STATE_FLAG_ =                        1 << 16;
+dota.UNIT_TARGET_STATE_FLAG_NOT_CREEP_HERO =            1 << 17;
+//dota.UNIT_TARGET_STATE_FLAG_ =                        1 << 18; // filters only passes if: (has this flag || does not have unit flag 31)
+//dota.UNIT_TARGET_STATE_FLAG_ =                        1 << 19; // has unit state 12
 
 /////////////// Unit type flags ///////////////
 // Couriers = 0
@@ -124,7 +124,7 @@ dota.UNIT_TYPE_FLAG_ANCIENT =    1 <<  5;
 dota.UNIT_TYPE_FLAG_BARRACKS =   1 <<  6;
 dota.UNIT_TYPE_FLAG_CREEP =      1 <<  7;
 dota.UNIT_TYPE_FLAG_COURIER =    1 <<  8;
-dota.UNIT_TYPE_FLAG_SHOP =       1 <<  9;
+dota.UNIT_TYPE_FLAG_WARD =       1 <<  9;
 dota.UNIT_TYPE_FLAG_LANE_CREEP = 1 << 10;
 dota.UNIT_TYPE_FLAG_ROSHAN =     1 << 11;
 
@@ -135,7 +135,7 @@ dota.UNIT_TARGET_TYPE_GENERAL =    1 << 1;
 dota.UNIT_TARGET_TYPE_BUILDINGS =  1 << 2;
 dota.UNIT_TARGET_TYPE_SIEGES =     1 << 3;
 dota.UNIT_TARGET_TYPE_COURIERS =   1 << 4;
-dota.UNIT_TARGET_TYPE_SHOP =       1 << 5;
+dota.UNIT_TARGET_TYPE_WARDS =      1 << 5;
 
 
 // The actual offset is around 0x2770, but it may change, so we store it as a relative
@@ -225,12 +225,13 @@ dota.removeAll = function(type){
 }
 
 dota.clearMap = function(){
+	dota.removeAll("ent_dota_fountain*");
+	dota.removeAll("ent_dota_shop*");
 	dota.removeAll("npc_dota_tower*");
 	dota.removeAll("npc_dota_fort*");
 	dota.removeAll("npc_dota_barracks*");
 	dota.removeAll("npc_dota_creep*");
 	dota.removeAll("npc_dota_building*");
-	dota.removeAll("ent_dota_fountain*");
 	dota.removeAll("npc_dota_neutral_spawner*");
 	dota.removeAll("npc_dota_roshan_spawner*");
 	dota.removeAll("npc_dota_scripted_spawner*");
