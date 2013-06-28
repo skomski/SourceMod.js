@@ -11,7 +11,7 @@ MSocket *g_MSocket;
 
 v8::Persistent<v8::Object> CreateBuffer(v8::Isolate *isolate, uint8_t *ptr, size_t len);
 void FreeBuffer(v8::Isolate *isolate, v8::Persistent<v8::Object> buffer);
-void FreeBufferCallback(Isolate* isolate, v8::Persistent<v8::Value> object, void *parameter);
+void FreeBufferCallback(Isolate* isolate, v8::Persistent<v8::Value> *object, void *parameter);
 
 MSocket::MSocket(){
 	identifier = "socket";
@@ -321,9 +321,9 @@ v8::Persistent<v8::Object> CreateBuffer(v8::Isolate *isolate, uint8_t *ptr, size
 }
 
 void FreeBuffer(v8::Isolate *isolate, v8::Persistent<v8::Object> buffer){
-	buffer.MakeWeak(isolate, NULL, FreeBufferCallback);
+	buffer.MakeWeak<v8::Value, void>(NULL, FreeBufferCallback);
 }
 
-void FreeBufferCallback(Isolate* isolate, v8::Persistent<v8::Value> object, void *parameter){
-	delete v8::Handle<v8::External>::Cast(object->ToObject()->GetHiddenValue(v8::String::New("SMJS::bufferPtr")))->Value();
+void FreeBufferCallback(Isolate* isolate, v8::Persistent<v8::Value> *object, void *parameter){
+	delete v8::Handle<v8::External>::Cast((*object)->ToObject()->GetHiddenValue(v8::String::New("SMJS::bufferPtr")))->Value();
 }

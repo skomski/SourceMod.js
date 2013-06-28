@@ -8,6 +8,7 @@
 #include "sh_memory.h"
 #include "game/shared/protobuf/usermessages.pb.h"
 #include "game/shared/dota/protobuf/dota_usermessages.pb.h"
+#include "MemoryUtils.h"
 
 #define WAIT_FOR_PLAYERS_COUNT_SIG "\x83\x3D****\x00\x7E\x19\x8B\x0D****\x83\x79\x30\x00"
 #define WAIT_FOR_PLAYERS_COUNT_SIG_LEN 19
@@ -36,6 +37,10 @@
 		name = *(type**)name; \
 	}
 	
+#define FIND_DOTA_PTR_NEW(name, signature, len) \
+	if((*((void**)&name) = g_MemUtils.FindPattern(serverFac, signature, len)) == NULL){ \
+		smutils->LogError(myself, "Couldn't sigscan " #name); \
+	}
 
 #define FIND_DOTA_FUNC(name) \
 	if(!dotaConf->GetMemSig(#name, (void**) &name) || name == NULL){ \
@@ -129,6 +134,7 @@ static CDetour *parseUnitDetour;
 static CDetour *getAbilityValueDetour;
 static CDetour *clientPickHeroDetour;
 static CDetour *heroBuyItemDetour;
+static CDetour *unitThinkDetour;
 
 static void (*UTIL_Remove)(IServerNetworkable *oldObj);
 static void **FindUnitsInRadius;
@@ -148,6 +154,8 @@ static void **DLinkItemDrop;
 // and we'll be fine.
 static CUtlVector<CBaseHandle> findClearSpaceForUnitOutput(0, 2048);
 
+static bool canSetState = false;
+
 static void PatchVersionCheck();
 static void PatchWaitForPlayersCount();
 
@@ -157,6 +165,9 @@ MDota::MDota(){
 	identifier = "dota";
 
 	printf("Initializing dota.js module...\n");
+
+	auto serverFac = g_SMAPI->GetServerFactory(false);
+
 	PatchVersionCheck();
 	PatchWaitForPlayersCount();
 
@@ -183,9 +194,13 @@ MDota::MDota(){
 	heroBuyItemDetour = DETOUR_CREATE_STATIC(HeroBuyItem, "HeroBuyItem");
 	if(heroBuyItemDetour) heroBuyItemDetour->EnableDetour();
 
+	unitThinkDetour = DETOUR_CREATE_MEMBER(UnitThink, "UnitThink");
+	if(unitThinkDetour) unitThinkDetour->EnableDetour();
+
+
 	FIND_DOTA_PTR(GameManager);
 
-	FIND_DOTA_FUNC(UTIL_Remove);
+	FIND_DOTA_PTR_NEW(UTIL_Remove, "\x55\x8B\xEC\x83\xE4\xF8\x56\x8B\x75\x08\x57\x85\xF6\x74*\x8B\x46\x08\xF6\x80****\x01\x75*\x8B", 28);
 	FIND_DOTA_FUNC(FindUnitsInRadius);
 	FIND_DOTA_FUNC(LoadParticleFile);
 	FIND_DOTA_FUNC(CreateUnit);
@@ -807,6 +822,24 @@ FUNCTION_M(MDota::findUnitsInRadius)
 	RETURN_SCOPED(arr);
 END
 
+FUNCTION_M(MDota::setUnitState)
+	USE_NETPROP_OFFSET(stateOffset, CDOTA_BaseNPC, m_nUnitState);
+
+	PENT(unit);
+	PINT(state);
+	PBOL(value);
+
+	if(!canSetState) THROW("Cannot set unit state at this time, use the Dota_UnitStatesGathered hook");
+
+	if(value){
+		*(uint32_t*)((intptr_t) unit->ent + stateOffset) |= (1 << state);
+	}else{
+		*(uint32_t*)((intptr_t) unit->ent + stateOffset) &= ~(1 << state);
+	}
+
+	RETURN_UNDEF;
+END
+
 FUNCTION_M(MDota::_unitInvade)
 	PENT(unit);
 
@@ -842,3 +875,4 @@ FUNCTION_M(MDota::_unitInvade)
 
 	RETURN_UNDEF;
 END
+	

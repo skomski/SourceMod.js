@@ -55,30 +55,55 @@ dota.UNIT_TARGET_TEAM_CUSTOM = 4;
 /////////////// Unit states ///////////////
 // ethereal: 1 + 3
 // manta: 6 + 9 + 10 + 15 + 23
-// courier in fountain: 9 + 10 + 24 + 25
-// courier outside fountain: 10 + 24 + 25
-// barracks without t3 taken = 9 + 23
 // brewmaster during ult: 6 + 9 + 15 + 18 + 23 + 31
+// hex: 2 + 4 + 5 + 7 + 13 + 14
+// void's ult: 6 + 18 + 28
+// jugger during ult: 0 + 9 + 10 + 15 + 23
+// OD's banish: 6 + 9 + 15 + 18 + 23 + 31
+// lifestealer during ult: 0 + 2 + 3 + 8 + 9 + 10 + 15 + 19 + 23 + 25 + 31
+// naga's ult: 0 + 2 + 6 + 9
+// bane nightmare, first second: 0 + 2 + 6 + 9 + 12 + 23
+// bane nightmare: 0 + 2 + 6 + 12
 //
 // 1 and 2 prevent the unit from auto attacking
 // 3 prevents units from attacking it
-// 15 no health bar
-// 18 some sort of perfomance mode, the fps of the animation is decreased significantly
+// 15 no health bar, cannot be clicked but can still be attacked
 // 23 no health bar
-// 24 flying and flying vision
-// 30 makes the unity not give vision
+// 28 gyro's Q only works if this is 0
+// 30 makes the unit not give vision
 /// Unit can still turn around and attack
 dota.UNIT_STATE_ROOTED = 0;
+// 1 +
+dota.UNIT_STATE_NO_AUTOATTACKS = 2;
+// 3 +
 dota.UNIT_STATE_SILENCED = 4;
-/// Does not send an error if the player tries to act, just queues the action for when
-/// this state is removed
-dota.UNIT_STATE_CANT_ACT = 6;
+dota.UNIT_STATE_HEXED = 5;
+dota.UNIT_STATE_STUNNED = 6;
+// 7 +
 dota.UNIT_STATE_INVISIBLE = 8;
 dota.UNIT_STATE_INVULNERABLE = 9;
 dota.UNIT_STATE_MAGIC_IMMUNE = 10;
-/// Sends an error if the player tries to act
-dota.UNIT_STATE_CANT_ACT2 = 19;
+dota.UNIT_STATE_REVEALED = 11;
+// 12 sleeping? (bane)
+// 13 +
+// 14 +
+// 15 +
+// 16
+// 17
+dota.UNIT_STATE_PAUSED = 18;
+dota.UNIT_STATE_CANT_ACT = 19;
+// 20
+// 21
+// 22
+dota.UNIT_STATE_NO_HEALTHBAR = 23;
+dota.UNIT_STATE_FLYING = 24;
+dota.UNIT_STATE_PHASE = 25;
+// 26
+// 27
+// 28 +
 dota.UNIT_STATE_DOMINATED = 29;
+dota.UNIT_STATE_NO_VISION = 30;
+dota.UNIT_STATE_BANISHED = 31;
 
 /////////////// Unit target flags ///////////////
 
@@ -153,6 +178,11 @@ dota.setMoveCapabilities = function(unit, cap){
 	unit.setData(moveCapabilitiesOffset, 4, cap);
 }
 
+var unitTypeOffset = game.getPropOffset("CDOTA_BaseNPC", "m_iCurrentLevel") - 0x0010;
+dota.getUnitType = function(unit){
+	return unit.getData(unitTypeOffset, 4);
+}
+
 dota.setHeroLevel = function(hero, level){
 	var levelDiff = level - hero.netprops.m_iCurrentLevel;
 	if(levelDiff == 0) return;
@@ -216,6 +246,14 @@ Client.prototype.getHeroes = function(){
 	}else{
 		return [hero];
 	}
+}
+
+Entity.prototype.isHero = function(){
+	if(typeof this._isHero != 'undefined') return this._isHero;
+	
+	this._isHero = (dota.getUnitType(this) & dota.UNIT_TYPE_FLAG_HERO) == dota.UNIT_TYPE_FLAG_HERO;
+	
+	return this._isHero;
 }
 
 dota.removeAll = function(type){

@@ -17,7 +17,7 @@ public:
 
 	virtual void OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){};
 
-	virtual v8::Persistent<v8::Value> GetWrapper(SMJS_Plugin *plugin){return v8::Persistent<v8::Value>::New(v8::Undefined());};
+	virtual v8::Persistent<v8::Value> GetWrapper(SMJS_Plugin *plugin);
 	virtual void OnPluginDestroyed(SMJS_Plugin *plugin);
 
 	void Destroy();
@@ -62,7 +62,7 @@ public:
 	v8::Persistent<v8::Value> cls::CreateWrapper(SMJS_Plugin *plugin, cls* obj) { \
 		auto v = GetTemplateForPlugin(plugin)->GetFunction()->NewInstance(); \
 		v->SetInternalField(0, v8::External::New((void*)obj)); \
-		return v8::Persistent<v8::Value>::New(v); \
+		return v8::Persistent<v8::Value>::New(plugin->GetIsolate(), v); \
 	} \
 	v8::Persistent<v8::Value> cls::GetWrapper(SMJS_Plugin *plugin) { \
 		auto it = wrappers.find(plugin->id); \

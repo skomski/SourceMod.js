@@ -65,4 +65,5 @@ MEntities::MEntities(){
 void MEntities::OnWrapperAttached(SMJS_Plugin *plugin, v8::Persistent<v8::Value> wrapper){
 	auto obj = wrapper->ToObject();
 	
+	plugin->GetContext()->Global()->Set(v8::String::NewSymbol("Entity"), SMJS_Entity::GetTemplateForPlugin(plugin)->GetFunction());
 }

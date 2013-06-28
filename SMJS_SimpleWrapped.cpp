@@ -4,14 +4,14 @@
 
 v8::Persistent<FunctionTemplate> SMJS_SimpleWrapped::temp;
 
-void SimpleDecWrappedRefCount(Isolate* isolate, v8::Persistent<v8::Value> object, void *parameter){
+void SimpleDecWrappedRefCount(Isolate* isolate, v8::Persistent<v8::Value> *object, SMJS_SimpleWrapped *parameter){
 	SMJS_BaseWrapped *wrapped = (SMJS_BaseWrapped*) parameter;
 	if(--wrapped->refCount == 0){
 		delete wrapped;
 	}
 
-	object.Dispose();
-    object.Clear();
+	object->Dispose();
+    object->Clear();
 }
 
 SMJS_SimpleWrapped::SMJS_SimpleWrapped(SMJS_Plugin *pl) : plugin(pl){
@@ -23,6 +23,6 @@ void SMJS_SimpleWrapped::Destroy(){
 	if(refCount == 0){
 		delete this;
 	}else{
-		wrapper.MakeWeak(plugin->GetIsolate(), (void*) this, SimpleDecWrappedRefCount);
+		wrapper.MakeWeak<v8::Value, SMJS_SimpleWrapped>(plugin->GetIsolate(), this, SimpleDecWrappedRefCount);
 	}
 }

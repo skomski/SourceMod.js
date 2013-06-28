@@ -44,12 +44,12 @@ SMJS_Plugin::SMJS_Plugin(bool isSandboxed){
 
 	HandleScope handle_scope(isolate);
 
-	Handle<ObjectTemplate> global = v8::ObjectTemplate::New();
+	v8::Handle<v8::ObjectTemplate> global = v8::ObjectTemplate::New();
 
 	global->Set(v8::String::New("print"), v8::FunctionTemplate::New(JSN_Print));
 	global->Set(v8::String::New("require"), v8::FunctionTemplate::New(JSN_Require));
-
-	context = v8::Context::New(NULL, global);
+	
+	context = v8::Persistent<v8::Context>::New(isolate, v8::Context::New(isolate, NULL, global));
 	context->SetEmbedderData(1, v8::External::New(this));
 
 	if(isSandboxed){

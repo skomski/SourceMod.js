@@ -108,11 +108,11 @@ void OnClientPutInServer(int clientIndex, const char *playername){
 
 	// If it's a bot
 	if(client == NULL){
-		edict_t *pEntity = gamehelpers->EdictOfIndex(clientIndex);
-		client = new SMJS_Client(pEntity);
+		edict_t *edict = gamehelpers->EdictOfIndex(clientIndex);
+		client = new SMJS_Client(edict);
 		clients[client->entIndex] = client;
 		client->ReattachEntity();
-		clients[gamehelpers->IndexOfEdict(pEntity)] = client;
+		clients[gamehelpers->IndexOfEdict(edict)] = client;
 	}
 
 	client->inGame = true;

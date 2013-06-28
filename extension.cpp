@@ -78,7 +78,7 @@ bool SMJS::SDK_OnLoad(char *error, size_t maxlength, bool late){
 	sharesys->AddDependency(myself, "bintools.ext", true, true);
 
 	if(!SMJS_LoadConfs(error, maxlength, late)) return false;
-
+	
 	v8::V8::Initialize();
 	SMJS_Init();
 

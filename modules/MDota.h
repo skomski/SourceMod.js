@@ -140,8 +140,10 @@ public:
 	FUNCTION_DECL(giveExperienceToHero);
 	FUNCTION_DECL(unitHasState);
 	FUNCTION_DECL(findUnitsInRadius);
+	FUNCTION_DECL(setUnitState);
 
 	FUNCTION_DECL(_unitInvade);
+	
 
 	WRAPPED_CLS(MDota, SMJS_Module) {
 		temp->SetClassName(v8::String::NewSymbol("DotaModule"));
@@ -164,8 +166,10 @@ public:
 		WRAPPED_FUNC(giveExperienceToHero);
 		WRAPPED_FUNC(unitHasState);
 		WRAPPED_FUNC(findUnitsInRadius);
+		WRAPPED_FUNC(setUnitState);
 
 		WRAPPED_FUNC(_unitInvade);
+		
 
 #define HERO_ID_CONST(name, value) proto->Set(v8::String::New("HERO_" #name), v8::Int32::New(Hero_##value), v8::ReadOnly);
 		

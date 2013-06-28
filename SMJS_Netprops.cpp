@@ -15,7 +15,7 @@ struct SMJS_Netprops_CachedValueData {
 	SendProp *prop;
 };
 
-void DestroyDataCallback(Isolate* isolate, v8::Persistent<v8::Value> object, void *parameter){
+void DestroyDataCallback(Isolate* isolate, v8::Persistent<v8::Value> *object, SMJS_Netprops_CachedValueData *parameter){
 	delete parameter;
 }
 
@@ -52,7 +52,7 @@ SMJS_Netprops::~SMJS_Netprops(){
 			if(hiddenValue.IsEmpty() || hiddenValue->IsUndefined() || hiddenValue->IsNull()) continue;
 			SMJS_Netprops_CachedValueData *data = (SMJS_Netprops_CachedValueData *) v8::Handle<External>::Cast(hiddenValue)->Value();
 
-			it->second.MakeWeak(pl->GetIsolate(), data, DestroyDataCallback);
+			it->second.MakeWeak<v8::Value, SMJS_Netprops_CachedValueData>(data, DestroyDataCallback);
 		}
 	}
 }

@@ -24,6 +24,9 @@
     <Filter Include="Dota">
       <UniqueIdentifier>{8f45bc9e-d713-41e6-8672-3a98326a50f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SourceMod">
+      <UniqueIdentifier>{a8ad8dc1-c322-42ac-ae9b-f43e58cae0b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\extension.cpp">
@@ -145,6 +148,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\hl2sdk-dota\public\engine\protobuf\networkbasetypes.pb.cc">
       <Filter>Dota</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sourcemod\MemoryUtils.cpp">
+      <Filter>SourceMod</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -300,6 +306,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\hl2sdk-dota\public\engine\protobuf\networkbasetypes.pb.h">
       <Filter>Dota</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sourcemod\MemoryUtils.h">
+      <Filter>SourceMod</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
