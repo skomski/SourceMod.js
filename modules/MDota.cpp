@@ -135,6 +135,7 @@ static CDetour *getAbilityValueDetour;
 static CDetour *clientPickHeroDetour;
 static CDetour *heroBuyItemDetour;
 static CDetour *unitThinkDetour;
+static CDetour *heroSpawnDetour;
 
 static void (*UTIL_Remove)(IServerNetworkable *oldObj);
 static void **FindUnitsInRadius;
@@ -196,6 +197,9 @@ MDota::MDota(){
 
 	unitThinkDetour = DETOUR_CREATE_MEMBER(UnitThink, "UnitThink");
 	if(unitThinkDetour) unitThinkDetour->EnableDetour();
+
+	heroSpawnDetour = DETOUR_CREATE_MEMBER(HeroSpawn, "HeroSpawn");
+	if(heroSpawnDetour) heroSpawnDetour->EnableDetour();
 
 
 	FIND_DOTA_PTR(GameManager);

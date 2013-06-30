@@ -64,6 +64,7 @@ dota.UNIT_TARGET_TEAM_CUSTOM = 4;
 // naga's ult: 0 + 2 + 6 + 9
 // bane nightmare, first second: 0 + 2 + 6 + 9 + 12 + 23
 // bane nightmare: 0 + 2 + 6 + 12
+// bh invis: 2 + 3 + 6 + 8 + 9 + 12 + 13 + 16 + 17 + 20 + 21
 //
 // 1 and 2 prevent the unit from auto attacking
 // 3 prevents units from attacking it
@@ -88,12 +89,12 @@ dota.UNIT_STATE_REVEALED = 11;
 // 13 +
 // 14 +
 // 15 +
-// 16
-// 17
+// 16 +
+// 17 +
 dota.UNIT_STATE_PAUSED = 18;
 dota.UNIT_STATE_CANT_ACT = 19;
-// 20
-// 21
+// 20 +
+// 21 +
 // 22
 dota.UNIT_STATE_NO_HEALTHBAR = 23;
 dota.UNIT_STATE_FLYING = 24;
