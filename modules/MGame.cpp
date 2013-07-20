@@ -264,6 +264,15 @@ CBaseEntity* MGame::FindEntityByClassname(int startIndex, char *searchname){
 	return NativeFindEntityByClassname(startIndex, searchname);
 }
 
+FUNCTION_M(MGame::getEHandleIndex)
+	 CBaseEntity *pGetterEnt = gamehelpers->ReferenceToEntity(0);
+     datamap_t *pMap = gamehelpers->GetDataMap(pGetterEnt);
+     typedescription_t *pDesc = gamehelpers->FindInDataMap(pMap, "m_iClassname");
+     auto offset = pDesc->fieldOffset;
+
+	 RETURN_SCOPED(v8::Int32::New(offset));
+END
+
 FUNCTION_M(MGame::hook)
 	ARG_COUNT(2);
 	PSTR(str);
@@ -295,7 +304,8 @@ FUNCTION_M(MGame::precacheModel)
 		preload = args[1]->BooleanValue();
 	}
 
-
+	
+	
 	RETURN_SCOPED(v8::Integer::New(engine->PrecacheModel(*str, preload)));
 END
 

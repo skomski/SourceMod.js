@@ -24,6 +24,7 @@ public:
 	FUNCTION_DECL(printToChat);
 	FUNCTION_DECL(printToConsole);
 	FUNCTION_DECL(isInGame);
+	FUNCTION_DECL(sendAudio);
 	FUNCTION_DECL(fakeCommand);
 	FUNCTION_DECL(isFake);
 	FUNCTION_DECL(isReplay);
@@ -42,6 +43,7 @@ public:
 		WRAPPED_FUNC(getName);
 		WRAPPED_FUNC(printToChat);
 		WRAPPED_FUNC(printToConsole);
+		WRAPPED_FUNC(sendAudio);
 		WRAPPED_FUNC(isInGame);
 		WRAPPED_FUNC(fakeCommand);
 		WRAPPED_FUNC(isFake);

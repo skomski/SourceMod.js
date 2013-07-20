@@ -120,7 +120,7 @@ struct AbilityData {
 	uint32_t	flags;
 };
 
-static IGameConfig *dotaConf = NULL;
+
 static void *LoadParticleFile;
 static void *CreateUnit;
 
@@ -179,6 +179,9 @@ MDota::MDota(){
 			return;
 		}
 	}
+
+	//get ParticleManager
+
 
 	CDetourManager::Init(g_pSM->GetScriptingEngine(), dotaConf);
 
@@ -649,6 +652,7 @@ FUNCTION_M(MDota::createItemDrop)
 
 	RETURN_SCOPED(GetEntityWrapper(drop)->GetWrapper(GetPluginRunning()));
 END
+
 
 FUNCTION_M(MDota::levelUpHero)
 	PENT(unit);

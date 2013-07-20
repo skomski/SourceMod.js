@@ -837,3 +837,37 @@ public:
 
 	
 };
+
+
+static void* (*GetParticleManager)();
+
+/*class CTFGameRulesCaller
+{
+public :
+        static int *(CTFGameRulesCaller::*CreateParticle)(char  const* name,int particleindex,CBaseEntity *entity,CRecipientFilter *filter);
+};
+int *(CTFGameRulesCaller::*CTFGameRulesCaller::CreateParticle)(char  const* name,int particleindex,CBaseEntity *entity,CRecipientFilter *filter) = NULL;
+ 
+ 
+void Init()
+{
+        void **pfn = NULL;
+        unsigned char *addr;
+       
+        if (!dotaConf->GetMemSig("CreateParticle", (void **)&addr) || !addr)
+        {
+                g_pSM->Format("what", 100, "Could not locate \"RoundRespawn\" function");
+                return;
+        }
+        pfn = (void **)(&CTFGameRulesCaller::CreateParticle);
+        *pfn = addr;
+}
+ 
+void Call(CBaseEntity *entity, CRecipientFilter *filter)
+{
+        CTFGameRulesCaller **g_pCTFGameRulesCaller = reinterpret_cast<CTFGameRulesCaller **>(GetParticleManager);
+        
+
+        (*g_pCTFGameRulesCaller->*CTFGameRulesCaller::CreateParticle)("yes", 1268, entity, filter);
+}
+*/

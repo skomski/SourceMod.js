@@ -11,6 +11,8 @@
 #include "SMJS_Module.h"
 #include "SMJS_BaseWrapped.h"
 
+static IGameConfig *dotaConf = NULL;
+
 typedef SMJS_Module* (*SMJS_ModuleCreator)();
 
 void SMJS_AddModule(SMJS_Module *module);

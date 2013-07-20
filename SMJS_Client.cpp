@@ -1,6 +1,7 @@
 #include "SMJS_Client.h"
 #include "SMJS_Plugin.h"
 #include "game/shared/protobuf/usermessages.pb.h"
+#include "game/shared/dota/protobuf/dota_usermessages.pb.h"
 
 #if SOURCE_ENGINE == SE_DOTA
 	#include "game/shared/dota/protobuf/dota_usermessages.pb.h"
@@ -45,7 +46,7 @@ void SendMessage(int clientIndex, int dest, const char *str){
 	textmsg.add_param("");
 	textmsg.add_param("");
 	textmsg.add_param("");
-
+	
 	engine->SendUserMessage(filter, UM_TextMsg, textmsg);
 }
 
@@ -56,6 +57,22 @@ FUNCTION_M(SMJS_Client::printToChat)
 	PSTR(str);
 	
 	SendMessage(self->entIndex, TEXTMSG_DEST_CHAT, *str);
+	RETURN_UNDEF;
+END
+
+FUNCTION_M(SMJS_Client::sendAudio)
+	GET_INTERNAL(SMJS_Client*, self);
+	if(!self->valid) THROW("Invalid entity");
+
+	PBOL(stop);
+	PSTR(name);
+
+	CUserMsg_SendAudio audiomsg;
+	audiomsg.set_stop(stop);
+	audiomsg.set_name(*name);
+	SingleRecipientFilter filter(self->entIndex);
+
+	engine->SendUserMessage(filter, UM_SendAudio, audiomsg);
 	RETURN_UNDEF;
 END
 

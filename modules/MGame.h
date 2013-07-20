@@ -35,6 +35,7 @@ public:
 	FUNCTION_DECL(createEntity);
 	FUNCTION_DECL(getPropOffset);
 	FUNCTION_DECL(getEntityByIndex);
+	FUNCTION_DECL(getEHandleIndex);
 
 	FUNCTION_DECL(pause);
 	FUNCTION_DECL(resume);
